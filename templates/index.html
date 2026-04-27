@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>跨所资金费率分析</title>
+    <style>
+      :root {
+        --bg: #f6f3ec;
+        --panel: #fffdf8;
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --line: #e5ddd0;
+        --accent: #136f63;
+        --accent-soft: #e0f2ef;
+        --good: #0f9f63;
+        --bad: #d14343;
+        --warn: #b7791f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top right, rgba(19, 111, 99, 0.15), transparent 28%),
+          linear-gradient(180deg, #f9f7f2 0%, #f1ede4 100%);
+      }
+
+      .page {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 32px 20px 56px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 24px;
+        align-items: stretch;
+        margin-bottom: 24px;
+      }
+
+      .hero-card,
+      .panel {
+        background: rgba(255, 253, 248, 0.92);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(229, 221, 208, 0.95);
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(74, 58, 35, 0.08);
+      }
+
+      .hero-card {
+        padding: 28px;
+      }
+
+      .eyebrow {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(32px, 4vw, 52px);
+        line-height: 1.02;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.7;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .mini-card {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: #f8f4ec;
+        border: 1px solid var(--line);
+      }
+
+      .mini-card strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .mini-card span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .panel {
+        padding: 22px;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .field label {
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: white;
+        color: var(--ink);
+        font-size: 14px;
+      }
+
+      .field.full {
+        grid-column: 1 / -1;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .hint {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #0f766e 0%, #136f63 100%);
+        color: white;
+        padding: 12px 22px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .alert {
+        margin: 18px 0 0;
+        padding: 14px 16px;
+        border-radius: 16px;
+        font-size: 14px;
+      }
+
+      .alert.error {
+        background: #fff1f1;
+        color: #8a2727;
+        border: 1px solid #f0c6c6;
+      }
+
+      .alert.warn {
+        background: #fff8ea;
+        color: #8a5a12;
+        border: 1px solid #f1dfb3;
+      }
+
+      .results {
+        display: grid;
+        gap: 18px;
+        margin-top: 24px;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .stat {
+        padding: 18px;
+        border-radius: 18px;
+        background: #faf6ef;
+        border: 1px solid var(--line);
+      }
+
+      .stat small {
+        color: var(--muted);
+        display: block;
+        margin-bottom: 10px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .stat strong {
+        font-size: 28px;
+      }
+
+      .positive {
+        color: var(--good);
+      }
+
+      .negative {
+        color: var(--bad);
+      }
+
+      .neutral {
+        color: var(--warn);
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--line);
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      th:first-child,
+      td:first-child {
+        text-align: left;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .section-head h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .section-head span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 960px) {
+        .hero,
+        .summary-grid,
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .actions {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="hero">
+        <section class="hero-card">
+          <span class="eyebrow">Local Funding Dashboard</span>
+          <h1>跨所资金费率对冲分析</h1>
+          <p>在本地浏览器里直接查看不同交易所之间的资金费率差，快速判断做多 / 做空组合下的费用优势和日度累计结果。</p>
+          <div class="hero-grid">
+            <div class="mini-card">
+              <strong>对冲视角</strong>
+              <span>默认使用 `做空费率 - 做多费率` 作为利差，正数代表组合更有利。</span>
+            </div>
+            <div class="mini-card">
+              <strong>覆盖交易所</strong>
+              <span>Binance、Bybit、Bitget、OKX、Gate.io 已集成。</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <form method="post">
+            <div class="form-grid">
+              <div class="field">
+                <label for="symbol">币种</label>
+                <input id="symbol" name="symbol" value="{{ form_data.symbol }}" placeholder="例如 KAT">
+              </div>
+              <div class="field">
+                <label for="long_exchange">做多交易所</label>
+                <select id="long_exchange" name="long_exchange">
+                  {% for exchange in exchanges %}
+                  <option value="{{ exchange }}" {% if form_data.long_exchange == exchange %}selected{% endif %}>{{ exchange }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="field">
+                <label for="short_exchange">做空交易所</label>
+                <select id="short_exchange" name="short_exchange">
+                  {% for exchange in exchanges %}
+                  <option value="{{ exchange }}" {% if form_data.short_exchange == exchange %}selected{% endif %}>{{ exchange }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="field">
+                <label for="start_time">开始时间</label>
+                <input id="start_time" type="datetime-local" name="start_time" value="{{ form_data.start_time }}">
+              </div>
+              <div class="field">
+                <label for="end_time">结束时间</label>
+                <input id="end_time" type="datetime-local" name="end_time" value="{{ form_data.end_time }}">
+              </div>
+            </div>
+            <div class="actions">
+              <div class="hint">默认展示最近 10 天的历史资金费率对冲结果。</div>
+              <button type="submit">开始分析</button>
+            </div>
+          </form>
+
+          {% if error %}
+          <div class="alert error">{{ error }}</div>
+          {% endif %}
+        </section>
+      </div>
+
+      {% if result %}
+      <div class="results">
+        <section class="panel">
+          <div class="section-head">
+            <h2>{{ result.symbol }} 分析结果</h2>
+            <span>{{ result.long_exchange }} 做多 / {{ result.short_exchange }} 做空 · {{ result.start_time }} 至 {{ result.end_time }}</span>
+          </div>
+          <div class="summary-grid">
+            <div class="stat">
+              <small>{{ result.long_exchange }} 累计</small>
+              <strong class="{{ 'positive' if result.totals.long_rate > 0 else 'negative' if result.totals.long_rate < 0 else 'neutral' }}">
+                {{ '%.4f'|format(result.totals.long_rate) }}%
+              </strong>
+            </div>
+            <div class="stat">
+              <small>{{ result.short_exchange }} 累计</small>
+              <strong class="{{ 'positive' if result.totals.short_rate > 0 else 'negative' if result.totals.short_rate < 0 else 'neutral' }}">
+                {{ '%.4f'|format(result.totals.short_rate) }}%
+              </strong>
+            </div>
+            <div class="stat">
+              <small>总利差 (S-L)</small>
+              <strong class="{{ 'positive' if result.totals.spread > 0 else 'negative' if result.totals.spread < 0 else 'neutral' }}">
+                {{ '%.4f'|format(result.totals.spread) }}%
+              </strong>
+            </div>
+          </div>
+
+          {% if result.warnings %}
+          <div class="alert warn">
+            {% for warning in result.warnings %}
+            <div>{{ warning }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <h2>每日汇总统计</h2>
+            <span>00:00 结算默认归到前一天</span>
+          </div>
+          <div style="overflow:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>统计日期</th>
+                  <th>{{ result.long_exchange }} 累计</th>
+                  <th>{{ result.short_exchange }} 累计</th>
+                  <th>当日总利差</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in result.daily_rows %}
+                <tr>
+                  <td>{{ row.date }}</td>
+                  <td class="{{ 'positive' if row.long_rate > 0 else 'negative' if row.long_rate < 0 else 'neutral' }}">{{ '%.4f'|format(row.long_rate) }}%</td>
+                  <td class="{{ 'positive' if row.short_rate > 0 else 'negative' if row.short_rate < 0 else 'neutral' }}">{{ '%.4f'|format(row.short_rate) }}%</td>
+                  <td class="{{ 'positive' if row.spread > 0 else 'negative' if row.spread < 0 else 'neutral' }}">{{ '%.4f'|format(row.spread) }}%</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <h2>详细结算明细</h2>
+            <span>仅在两边同一结算时刻都存在数据时才计算利差</span>
+          </div>
+          <div style="overflow:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>结算时间</th>
+                  <th>{{ result.long_exchange }} %</th>
+                  <th>{{ result.short_exchange }} %</th>
+                  <th>利差 % (S-L)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in result.settlement_rows %}
+                <tr>
+                  <td>{{ row.settlement_time }}</td>
+                  <td class="{{ 'muted' if row.long_rate is none else 'positive' if row.long_rate > 0 else 'negative' if row.long_rate < 0 else 'neutral' }}">{{ '-' if row.long_rate is none else '%.4f'|format(row.long_rate) ~ '%' }}</td>
+                  <td class="{{ 'muted' if row.short_rate is none else 'positive' if row.short_rate > 0 else 'negative' if row.short_rate < 0 else 'neutral' }}">{{ '-' if row.short_rate is none else '%.4f'|format(row.short_rate) ~ '%' }}</td>
+                  <td class="{{ 'muted' if row.spread is none else 'positive' if row.spread > 0 else 'negative' if row.spread < 0 else 'neutral' }}">{{ '-' if row.spread is none else '%.4f'|format(row.spread) ~ '%' }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      {% endif %}
+    </div>
+  </body>
+</html>

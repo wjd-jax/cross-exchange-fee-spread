@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>跨所资金费率分析</title>
+    <style>
+      :root {
+        --bg: #f6f3ec;
+        --panel: #fffdf8;
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --line: #e5ddd0;
+        --accent: #136f63;
+        --accent-soft: #e0f2ef;
+        --good: #0f9f63;
+        --bad: #d14343;
+        --warn: #b7791f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top right, rgba(19, 111, 99, 0.15), transparent 28%),
+          linear-gradient(180deg, #f9f7f2 0%, #f1ede4 100%);
+      }
+
+      .page {
+        max-width: 1360px;
+        margin: 0 auto;
+        padding: 32px 20px 56px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 24px;
+        align-items: stretch;
+        margin-bottom: 24px;
+      }
+
+      .hero-card,
+      .panel {
+        background: rgba(255, 253, 248, 0.92);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(229, 221, 208, 0.95);
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(74, 58, 35, 0.08);
+      }
+
+      .hero-card {
+        padding: 28px;
+      }
+
+      .eyebrow {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(32px, 4vw, 52px);
+        line-height: 1.02;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.7;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .mini-card {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: #f8f4ec;
+        border: 1px solid var(--line);
+      }
+
+      .mini-card strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .mini-card span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .panel {
+        padding: 22px;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .field.full {
+        grid-column: 1 / -1;
+      }
+
+      .field label {
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: white;
+        color: var(--ink);
+        font-size: 14px;
+      }
+
+      .actions {
+        display: grid;
+        gap: 14px;
+        margin-top: 20px;
+      }
+
+      .hint {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      button {
+        width: 100%;
+        border: 0;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #0f766e 0%, #136f63 100%);
+        color: white;
+        min-height: 56px;
+        padding: 0 24px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 16px 34px rgba(19, 111, 99, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 20px 38px rgba(19, 111, 99, 0.26);
+      }
+
+      button:disabled {
+        cursor: progress;
+        opacity: 0.75;
+      }
+
+      .alert {
+        margin: 18px 0 0;
+        padding: 14px 16px;
+        border-radius: 16px;
+        font-size: 14px;
+      }
+
+      .alert.error {
+        background: #fff1f1;
+        color: #8a2727;
+        border: 1px solid #f0c6c6;
+      }
+
+      .alert.warn {
+        background: #fff8ea;
+        color: #8a5a12;
+        border: 1px solid #f1dfb3;
+      }
+
+      .results {
+        display: none;
+        gap: 18px;
+        margin-top: 24px;
+      }
+
+      .results.visible {
+        display: grid;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .stat {
+        padding: 18px;
+        border-radius: 18px;
+        background: #faf6ef;
+        border: 1px solid var(--line);
+      }
+
+      .stat-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .stat small {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .stat strong {
+        font-size: 28px;
+      }
+
+      .summary-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-top: 14px;
+        padding: 18px;
+        border-radius: 18px;
+        background: #f8f4ec;
+        border: 1px dashed var(--line);
+      }
+
+      .summary-line-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .summary-line-copy small {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .summary-line-copy span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .summary-line strong {
+        font-size: 30px;
+        white-space: nowrap;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+        border: 1px solid transparent;
+      }
+
+      .tag.positive {
+        background: rgba(15, 159, 99, 0.12);
+        border-color: rgba(15, 159, 99, 0.2);
+      }
+
+      .tag.negative {
+        background: rgba(209, 67, 67, 0.12);
+        border-color: rgba(209, 67, 67, 0.2);
+      }
+
+      .tag.neutral {
+        background: rgba(183, 121, 31, 0.12);
+        border-color: rgba(183, 121, 31, 0.2);
+      }
+
+      .positive {
+        color: var(--good);
+      }
+
+      .negative {
+        color: var(--bad);
+      }
+
+      .neutral {
+        color: var(--warn);
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--line);
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      th:first-child,
+      td:first-child {
+        text-align: left;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .section-head h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .section-head span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 960px) {
+        .hero,
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .summary-line {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .summary-line strong {
+          white-space: normal;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="hero">
+        <section class="hero-card">
+          <span class="eyebrow">Pure Local HTML</span>
+          <h1>跨所资金费率对冲分析</h1>
+          <p>这是一个纯本地网页版本，不依赖 Flask 服务。直接打开这个 `index.html` 文件，就可以在浏览器里请求交易所公开接口并分析资金费率差。</p>
+          <div class="hero-grid">
+            <div class="mini-card">
+              <strong>对冲视角</strong>
+              <span>默认使用 `做空费率 - 做多费率` 作为利差，正数代表组合更有利。</span>
+            </div>
+            <div class="mini-card">
+              <strong>注意事项</strong>
+              <span>若某些交易所接口限制浏览器跨域，请求会在页面里直接提示，不会静默吞掉。</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <form id="analysis-form">
+            <div class="form-grid">
+              <div class="field full">
+                <label for="symbol">币种</label>
+                <input id="symbol" name="symbol" placeholder="例如 KAT">
+              </div>
+              <div class="field">
+                <label for="long_exchange">做多交易所</label>
+                <select id="long_exchange" name="long_exchange"></select>
+              </div>
+              <div class="field">
+                <label for="short_exchange">做空交易所</label>
+                <select id="short_exchange" name="short_exchange"></select>
+              </div>
+              <div class="field">
+                <label for="start_time">开始时间</label>
+                <input id="start_time" type="datetime-local" name="start_time">
+              </div>
+              <div class="field">
+                <label for="end_time">结束时间</label>
+                <input id="end_time" type="datetime-local" name="end_time">
+              </div>
+            </div>
+            <div class="actions">
+              <div class="hint">默认展示最近 10 天。直接双击打开当前文件即可使用，不需要本地端口。</div>
+              <button id="run-button" type="submit">开始分析</button>
+            </div>
+          </form>
+
+          <div id="error-box"></div>
+        </section>
+      </div>
+
+      <div id="results" class="results">
+        <section class="panel">
+          <div class="section-head">
+            <h2 id="result-title">分析结果</h2>
+            <span id="result-meta"></span>
+          </div>
+          <div class="summary-grid">
+            <div class="stat">
+              <div class="stat-head">
+                <small id="summary-long-label"></small>
+                <span id="summary-long-tag" class="tag neutral">持平</span>
+              </div>
+              <strong id="summary-long-value"></strong>
+            </div>
+            <div class="stat">
+              <div class="stat-head">
+                <small id="summary-short-label"></small>
+                <span id="summary-short-tag" class="tag neutral">持平</span>
+              </div>
+              <strong id="summary-short-value"></strong>
+            </div>
+            <div class="stat">
+              <div class="stat-head">
+                <small>总利差 (S-L)</small>
+                <span id="summary-spread-tag" class="tag neutral">持平</span>
+              </div>
+              <strong id="summary-spread-value"></strong>
+            </div>
+          </div>
+          <div class="summary-line">
+            <div class="summary-line-copy">
+              <small>当前资费差估算日利息</small>
+              <span id="summary-daily-interest-meta"></span>
+            </div>
+            <strong id="summary-daily-interest-value"></strong>
+          </div>
+          <div id="warning-box"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <h2>每日汇总统计</h2>
+            <span>00:00 结算默认归到前一天</span>
+          </div>
+          <div style="overflow:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>统计日期</th>
+                  <th id="daily-long-header"></th>
+                  <th id="daily-short-header"></th>
+                  <th>当日总利差</th>
+                </tr>
+              </thead>
+              <tbody id="daily-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <h2>详细结算明细</h2>
+            <span>仅在两边同一结算时刻都存在数据时才计算利差</span>
+          </div>
+          <div style="overflow:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>结算时间</th>
+                  <th id="settlement-long-header"></th>
+                  <th id="settlement-short-header"></th>
+                  <th>利差 % (S-L)</th>
+                </tr>
+              </thead>
+              <tbody id="settlement-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      const EXCHANGE_OPTIONS = [
+        { value: "binance", label: "bn" },
+        { value: "bybit", label: "bybit" },
+        { value: "bitget", label: "bitget" },
+        { value: "okx", label: "okx" },
+        { value: "gateio", label: "gateio" },
+      ];
+
+      const form = document.getElementById("analysis-form");
+      const symbolInput = document.getElementById("symbol");
+      const longExchangeSelect = document.getElementById("long_exchange");
+      const shortExchangeSelect = document.getElementById("short_exchange");
+      const startTimeInput = document.getElementById("start_time");
+      const endTimeInput = document.getElementById("end_time");
+      const runButton = document.getElementById("run-button");
+      const resultsEl = document.getElementById("results");
+      const errorBox = document.getElementById("error-box");
+      const warningBox = document.getElementById("warning-box");
+
+      function pad(value) {
+        return String(value).padStart(2, "0");
+      }
+
+      function formatDateTimeLocal(date) {
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+      }
+
+      function formatDateTimeDisplay(date) {
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+      }
+
+      function formatDateDisplay(date) {
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+      }
+
+      function toClassName(value) {
+        if (value === null || value === undefined) return "muted";
+        if (Math.abs(value) < 1e-8) return "neutral";
+        return value > 0 ? "positive" : "negative";
+      }
+
+      function formatPercent(value) {
+        if (value === null || value === undefined) return "-";
+        return `${value.toFixed(4)}%`;
+      }
+
+      function getPositionFundingImpact(value, side) {
+        if (value === null || value === undefined) return null;
+        if (side === "long") return -value;
+        if (side === "short") return value;
+        return value;
+      }
+
+      function getFundingTag(value) {
+        if (value === null || value === undefined || Math.abs(value) < 1e-8) {
+          return { text: "持平", className: "neutral" };
+        }
+        if (value > 0) {
+          return { text: "收资费", className: "positive" };
+        }
+        return { text: "付资费", className: "negative" };
+      }
+
+      function getProfitTag(value) {
+        if (value === null || value === undefined || Math.abs(value) < 1e-8) {
+          return { text: "持平", className: "neutral" };
+        }
+        if (value > 0) {
+          return { text: "盈利", className: "positive" };
+        }
+        return { text: "亏损", className: "negative" };
+      }
+
+      function getExchangeLabel(exchange) {
+        const match = EXCHANGE_OPTIONS.find((option) => option.value === exchange);
+        return match ? match.label : exchange;
+      }
+
+      function formatRatio(value) {
+        if (value === null || value === undefined || !Number.isFinite(value)) return "-";
+        return `${value.toFixed(2)} 次/天`;
+      }
+
+      function formatPercentPerDay(value) {
+        if (value === null || value === undefined) return "-";
+        return `${value.toFixed(4)}%/天`;
+      }
+
+      function setAlert(container, type, messages) {
+        if (!messages || messages.length === 0) {
+          container.innerHTML = "";
+          return;
+        }
+        container.innerHTML = `<div class="alert ${type}">${messages.map((message) => `<div>${message}</div>`).join("")}</div>`;
+      }
+
+      function fillExchangeOptions() {
+        const options = EXCHANGE_OPTIONS
+          .map((exchange) => `<option value="${exchange.value}">${exchange.label}</option>`)
+          .join("");
+        longExchangeSelect.innerHTML = options;
+        shortExchangeSelect.innerHTML = options;
+      }
+
+      function setDefaultFormValues() {
+        const endTime = new Date();
+        endTime.setSeconds(0, 0);
+        const startTime = new Date(endTime.getTime() - 10 * 24 * 60 * 60 * 1000);
+        symbolInput.value = "KAT";
+        longExchangeSelect.value = "bybit";
+        shortExchangeSelect.value = "binance";
+        startTimeInput.value = formatDateTimeLocal(startTime);
+        endTimeInput.value = formatDateTimeLocal(endTime);
+      }
+
+      async function fetchJson(url, params) {
+        const fullUrl = `${url}?${new URLSearchParams(params).toString()}`;
+        const response = await fetch(fullUrl, {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return await response.json();
+      }
+
+      async function getBinanceFundingRates(symbol, startDate, endDate, warnings) {
+        const rates = [];
+        try {
+          const data = await fetchJson("https://fapi.binance.com/fapi/v1/fundingRate", {
+            symbol: `${symbol}USDT`,
+            startTime: String(startDate.getTime()),
+            endTime: String(endDate.getTime() + 2000),
+            limit: "1000",
+          });
+          if (Array.isArray(data)) {
+            for (const item of data) {
+              const date = new Date(Number(item.fundingTime));
+              date.setSeconds(0, 0);
+              rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
+            }
+          }
+        } catch (error) {
+          warnings.push(`Binance 获取失败: ${error.message}`);
+        }
+        return rates;
+      }
+
+      async function getBitgetFundingRates(symbol, startDate, endDate, warnings) {
+        const rates = [];
+        try {
+          const data = await fetchJson("https://api.bitget.com/api/v3/market/history-fund-rate", {
+            category: "USDT-FUTURES",
+            symbol: `${symbol}USDT`,
+            startTime: String(startDate.getTime()),
+            endTime: String(endDate.getTime() + 2000),
+            limit: "100",
+          });
+          const payload = data?.data ?? {};
+          const list = Array.isArray(payload.resultList) ? payload.resultList : [];
+          for (const item of list) {
+            const date = new Date(Number(item.fundingRateTimestamp));
+            if (date < startDate || date > new Date(endDate.getTime() + 2000)) continue;
+            rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
+          }
+        } catch (error) {
+          warnings.push(`Bitget 获取失败: ${error.message}`);
+        }
+        return rates;
+      }
+
+      async function getBybitFundingRates(symbol, startDate, endDate, warnings) {
+        const rates = [];
+        try {
+          const data = await fetchJson("https://api.bybit.com/v5/market/funding/history", {
+            category: "linear",
+            symbol: `${symbol}USDT`,
+            endTime: String(endDate.getTime() + 2000),
+            limit: "200",
+          });
+          const list = Array.isArray(data?.result?.list) ? data.result.list : [];
+          for (const item of list) {
+            const date = new Date(Number(item.fundingRateTimestamp));
+            if (date < startDate || date > new Date(endDate.getTime() + 2000)) continue;
+            rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
+          }
+        } catch (error) {
+          warnings.push(`Bybit 获取失败: ${error.message}`);
+        }
+        return rates;
+      }
+
+      async function getOkxFundingRates(symbol, startDate, endDate, warnings) {
+        const rates = [];
+        const candidates = [`${symbol}-USD-SWAP`, `${symbol}-USDT-SWAP`];
+        for (const instId of candidates) {
+          try {
+            const data = await fetchJson("https://www.okx.com/api/v5/public/funding-rate-history", {
+              instId,
+              limit: "100",
+            });
+            if (data?.code !== "0") {
+              warnings.push(`OKX 返回错误 (${instId}): ${data?.msg || "未知错误"}`);
+              continue;
+            }
+            const items = Array.isArray(data?.data) ? data.data : [];
+            for (const item of items) {
+              const date = new Date(Number(item.fundingTime));
+              if (date < startDate || date > endDate) continue;
+              rates.push({ time: date, rate: Number(item.realizedRate) * 100 });
+            }
+            if (rates.length > 0) return rates;
+          } catch (error) {
+            warnings.push(`OKX 获取失败 (${instId}): ${error.message}`);
+          }
+        }
+        return rates;
+      }
+
+      async function getGateioFundingRates(symbol, startDate, endDate, warnings) {
+        const rates = [];
+        try {
+          const data = await fetchJson("https://api.gateio.ws/api/v4/futures/usdt/funding_rate", {
+            contract: `${symbol}_USDT`,
+            from: String(Math.floor(startDate.getTime() / 1000)),
+            to: String(Math.floor((endDate.getTime() + 2000) / 1000)),
+            limit: "100",
+          });
+          const list = Array.isArray(data) ? data : [];
+          for (const item of list) {
+            const date = new Date(Number(item.t) * 1000);
+            date.setSeconds(0, 0);
+            if (date < startDate || date > endDate) continue;
+            rates.push({ time: date, rate: Number(item.r) * 100 });
+          }
+        } catch (error) {
+          warnings.push(`Gate.io 获取失败: ${error.message}`);
+        }
+        return rates;
+      }
+
+      const exchangeFetchers = {
+        binance: getBinanceFundingRates,
+        bybit: getBybitFundingRates,
+        bitget: getBitgetFundingRates,
+        okx: getOkxFundingRates,
+        gateio: getGateioFundingRates,
+      };
+
+      async function analyzeFundingRates({ symbol, longExchange, shortExchange, startDate, endDate }) {
+        if (!symbol) throw new Error("币种不能为空");
+        if (!exchangeFetchers[longExchange]) throw new Error(`不支持的做多交易所: ${longExchange}`);
+        if (!exchangeFetchers[shortExchange]) throw new Error(`不支持的做空交易所: ${shortExchange}`);
+        if (startDate >= endDate) throw new Error("开始时间必须早于结束时间");
+
+        const warnings = [];
+        const [longRaw, shortRaw] = await Promise.all([
+          exchangeFetchers[longExchange](symbol, startDate, endDate, warnings),
+          exchangeFetchers[shortExchange](symbol, startDate, endDate, warnings),
+        ]);
+
+        const merged = new Map();
+        for (const row of longRaw) {
+          const key = row.time.getTime();
+          if (!merged.has(key)) merged.set(key, { time: row.time, longRate: null, shortRate: null });
+          merged.get(key).longRate = row.rate;
+        }
+        for (const row of shortRaw) {
+          const key = row.time.getTime();
+          if (!merged.has(key)) merged.set(key, { time: row.time, longRate: null, shortRate: null });
+          merged.get(key).shortRate = row.rate;
+        }
+
+        const settlementRows = [];
+        const dailyStats = new Map();
+        const comparableTimes = [];
+        let totalLong = 0;
+        let totalShort = 0;
+
+        const sortedRows = Array.from(merged.values()).sort((a, b) => a.time - b.time);
+        for (const row of sortedRows) {
+          const longRate = row.longRate;
+          const shortRate = row.shortRate;
+          const spread = longRate !== null && shortRate !== null ? shortRate - longRate : null;
+
+          const statsDate = new Date(row.time);
+          if (statsDate.getHours() === 0 && statsDate.getMinutes() === 0) {
+            statsDate.setDate(statsDate.getDate() - 1);
+          }
+          const statsKey = formatDateDisplay(statsDate);
+          if (!dailyStats.has(statsKey)) {
+            dailyStats.set(statsKey, { longRate: 0, shortRate: 0 });
+          }
+          const currentDaily = dailyStats.get(statsKey);
+
+          if (longRate !== null) {
+            currentDaily.longRate += longRate;
+            totalLong += longRate;
+          }
+          if (shortRate !== null) {
+            currentDaily.shortRate += shortRate;
+            totalShort += shortRate;
+          }
+
+          settlementRows.push({
+            settlementTime: formatDateTimeDisplay(row.time),
+            longRate,
+            shortRate,
+            spread,
+          });
+
+          if (spread !== null) {
+            comparableTimes.push(row.time.getTime());
+          }
+        }
+
+        let currentSpread = null;
+        if (settlementRows.length > 0) {
+          for (let index = settlementRows.length - 1; index >= 0; index -= 1) {
+            if (settlementRows[index].spread !== null) {
+              currentSpread = settlementRows[index].spread;
+              break;
+            }
+          }
+        }
+
+        let settlementsPerDay = null;
+        if (comparableTimes.length >= 2) {
+          const intervals = [];
+          for (let index = 1; index < comparableTimes.length; index += 1) {
+            const interval = comparableTimes[index] - comparableTimes[index - 1];
+            if (interval > 0) intervals.push(interval);
+          }
+          if (intervals.length > 0) {
+            intervals.sort((a, b) => a - b);
+            const medianInterval = intervals[Math.floor(intervals.length / 2)];
+            settlementsPerDay = (24 * 60 * 60 * 1000) / medianInterval;
+          }
+        }
+
+        const estimatedDailyInterest =
+          currentSpread !== null && settlementsPerDay !== null
+            ? currentSpread * settlementsPerDay
+            : null;
+
+        const dailyRows = Array.from(dailyStats.entries())
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map(([date, values]) => ({
+            date,
+            longRate: values.longRate,
+            shortRate: values.shortRate,
+            spread: values.shortRate - values.longRate,
+          }));
+
+        return {
+          symbol,
+          longExchange,
+          shortExchange,
+          startTime: formatDateTimeDisplay(startDate),
+          endTime: formatDateTimeDisplay(endDate),
+          settlementRows,
+          dailyRows,
+          totals: {
+            longRate: totalLong,
+            shortRate: totalShort,
+            spread: totalShort - totalLong,
+          },
+          current: {
+            spread: currentSpread,
+            settlementsPerDay,
+            estimatedDailyInterest,
+          },
+          warnings,
+        };
+      }
+
+      function renderSummary(result) {
+        const longLabel = getExchangeLabel(result.longExchange);
+        const shortLabel = getExchangeLabel(result.shortExchange);
+        const longImpact = getPositionFundingImpact(result.totals.longRate, "long");
+        const shortImpact = getPositionFundingImpact(result.totals.shortRate, "short");
+
+        document.getElementById("result-title").textContent = `${result.symbol} 分析结果`;
+        document.getElementById("result-meta").textContent = `${longLabel} 做多 / ${shortLabel} 做空 · ${result.startTime} 至 ${result.endTime}`;
+
+        document.getElementById("summary-long-label").textContent = `${longLabel} 累计`;
+        document.getElementById("summary-short-label").textContent = `${shortLabel} 累计`;
+
+        const longValue = document.getElementById("summary-long-value");
+        const shortValue = document.getElementById("summary-short-value");
+        const spreadValue = document.getElementById("summary-spread-value");
+        const longTag = document.getElementById("summary-long-tag");
+        const shortTag = document.getElementById("summary-short-tag");
+        const spreadTag = document.getElementById("summary-spread-tag");
+        const dailyInterestValue = document.getElementById("summary-daily-interest-value");
+        const dailyInterestMeta = document.getElementById("summary-daily-interest-meta");
+
+        longValue.textContent = formatPercent(longImpact);
+        shortValue.textContent = formatPercent(shortImpact);
+        spreadValue.textContent = formatPercent(result.totals.spread);
+        dailyInterestValue.textContent = formatPercentPerDay(result.current.estimatedDailyInterest);
+
+        longValue.className = toClassName(longImpact);
+        shortValue.className = toClassName(shortImpact);
+        spreadValue.className = toClassName(result.totals.spread);
+        dailyInterestValue.className = toClassName(result.current.estimatedDailyInterest);
+
+        const longTagInfo = getFundingTag(longImpact);
+        const shortTagInfo = getFundingTag(shortImpact);
+        const spreadTagInfo = getProfitTag(result.totals.spread);
+
+        longTag.textContent = longTagInfo.text;
+        shortTag.textContent = shortTagInfo.text;
+        spreadTag.textContent = spreadTagInfo.text;
+        longTag.className = `tag ${longTagInfo.className}`;
+        shortTag.className = `tag ${shortTagInfo.className}`;
+        spreadTag.className = `tag ${spreadTagInfo.className}`;
+
+        dailyInterestMeta.textContent =
+          result.current.spread !== null && result.current.settlementsPerDay !== null
+            ? `最新一笔资费差 ${formatPercent(result.current.spread)} · 约 ${formatRatio(result.current.settlementsPerDay)}`
+            : "当前同结算点数据不足，暂时无法估算日利息";
+      }
+
+      function renderDailyRows(result) {
+        document.getElementById("daily-long-header").textContent = `${getExchangeLabel(result.longExchange)} 累计`;
+        document.getElementById("daily-short-header").textContent = `${getExchangeLabel(result.shortExchange)} 累计`;
+
+        const body = document.getElementById("daily-table-body");
+        body.innerHTML = result.dailyRows.map((row) => `
+          <tr>
+            <td>${row.date}</td>
+            <td class="${toClassName(row.longRate)}">${formatPercent(row.longRate)}</td>
+            <td class="${toClassName(row.shortRate)}">${formatPercent(row.shortRate)}</td>
+            <td class="${toClassName(row.spread)}">${formatPercent(row.spread)}</td>
+          </tr>
+        `).join("");
+      }
+
+      function renderSettlementRows(result) {
+        document.getElementById("settlement-long-header").textContent = `${getExchangeLabel(result.longExchange)} %`;
+        document.getElementById("settlement-short-header").textContent = `${getExchangeLabel(result.shortExchange)} %`;
+
+        const body = document.getElementById("settlement-table-body");
+        body.innerHTML = result.settlementRows.map((row) => `
+          <tr>
+            <td>${row.settlementTime}</td>
+            <td class="${toClassName(row.longRate)}">${formatPercent(row.longRate)}</td>
+            <td class="${toClassName(row.shortRate)}">${formatPercent(row.shortRate)}</td>
+            <td class="${toClassName(row.spread)}">${formatPercent(row.spread)}</td>
+          </tr>
+        `).join("");
+      }
+
+      function renderResult(result) {
+        renderSummary(result);
+        renderDailyRows(result);
+        renderSettlementRows(result);
+        setAlert(warningBox, "warn", result.warnings);
+        resultsEl.classList.add("visible");
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        errorBox.innerHTML = "";
+        warningBox.innerHTML = "";
+        resultsEl.classList.remove("visible");
+
+        runButton.disabled = true;
+        runButton.textContent = "分析中...";
+
+        try {
+          const result = await analyzeFundingRates({
+            symbol: symbolInput.value.trim().toUpperCase(),
+            longExchange: longExchangeSelect.value,
+            shortExchange: shortExchangeSelect.value,
+            startDate: new Date(startTimeInput.value),
+            endDate: new Date(endTimeInput.value),
+          });
+          renderResult(result);
+        } catch (error) {
+          setAlert(errorBox, "error", [error.message || String(error)]);
+        } finally {
+          runButton.disabled = false;
+          runButton.textContent = "开始分析";
+        }
+      });
+
+      fillExchangeOptions();
+      setDefaultFormValues();
+    </script>
+  </body>
+</html>
