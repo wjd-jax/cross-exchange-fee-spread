@@ -37,15 +37,6 @@
         padding: 32px 20px 56px;
       }
 
-      .hero {
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 24px;
-        align-items: stretch;
-        margin-bottom: 24px;
-      }
-
-      .hero-card,
       .panel {
         background: rgba(255, 253, 248, 0.92);
         backdrop-filter: blur(10px);
@@ -54,63 +45,12 @@
         box-shadow: 0 20px 50px rgba(74, 58, 35, 0.08);
       }
 
-      .hero-card {
-        padding: 28px;
-      }
-
-      .eyebrow {
-        display: inline-block;
-        padding: 8px 12px;
-        border-radius: 999px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      h1 {
-        margin: 18px 0 12px;
-        font-size: clamp(32px, 4vw, 52px);
-        line-height: 1.02;
-      }
-
-      .hero p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 16px;
-        line-height: 1.7;
-      }
-
-      .hero-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-        margin-top: 20px;
-      }
-
-      .mini-card {
-        padding: 14px 16px;
-        border-radius: 18px;
-        background: #f8f4ec;
-        border: 1px solid var(--line);
-      }
-
-      .mini-card strong {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 13px;
-      }
-
-      .mini-card span {
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.5;
-      }
-
       .panel {
         padding: 22px;
+      }
+
+      .entry-panel {
+        margin-bottom: 24px;
       }
 
       .form-grid {
@@ -188,6 +128,29 @@
         border: 1px solid #f1dfb3;
       }
 
+      .alert.good {
+        background: #edf9f2;
+        color: #16613f;
+        border: 1px solid #b7e3c8;
+      }
+
+      .alert.info {
+        background: #eef6ff;
+        color: #1f4b7a;
+        border: 1px solid #cfe0f5;
+      }
+
+      .snapshot-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .snapshot-table td:first-child,
+      .snapshot-table th:first-child {
+        text-align: left;
+      }
+
       .results {
         display: grid;
         gap: 18px;
@@ -218,6 +181,42 @@
 
       .stat strong {
         font-size: 28px;
+      }
+
+      .summary-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-top: 14px;
+        padding: 18px;
+        border-radius: 18px;
+        background: #f8f4ec;
+        border: 1px dashed var(--line);
+      }
+
+      .summary-line-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .summary-line-copy small {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .summary-line-copy span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .summary-line strong {
+        font-size: 30px;
+        white-space: nowrap;
       }
 
       .positive {
@@ -281,8 +280,8 @@
       }
 
       @media (max-width: 960px) {
-        .hero,
         .summary-grid,
+        .snapshot-grid,
         .form-grid {
           grid-template-columns: 1fr;
         }
@@ -290,6 +289,15 @@
         .actions {
           align-items: stretch;
           flex-direction: column;
+        }
+
+        .summary-line {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .summary-line strong {
+          white-space: normal;
         }
 
         button {
@@ -300,24 +308,7 @@
   </head>
   <body>
     <div class="page">
-      <div class="hero">
-        <section class="hero-card">
-          <span class="eyebrow">Local Funding Dashboard</span>
-          <h1>跨所资金费率对冲分析</h1>
-          <p>在本地浏览器里直接查看不同交易所之间的资金费率差，快速判断做多 / 做空组合下的费用优势和日度累计结果。</p>
-          <div class="hero-grid">
-            <div class="mini-card">
-              <strong>对冲视角</strong>
-              <span>默认使用 `做空费率 - 做多费率` 作为利差，正数代表组合更有利。</span>
-            </div>
-            <div class="mini-card">
-              <strong>覆盖交易所</strong>
-              <span>Binance、Bybit、Bitget、OKX、Gate.io 已集成。</span>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
+        <section class="panel entry-panel">
           <form method="post">
             <div class="form-grid">
               <div class="field">
@@ -341,16 +332,12 @@
                 </select>
               </div>
               <div class="field">
-                <label for="start_time">开始时间</label>
-                <input id="start_time" type="datetime-local" name="start_time" value="{{ form_data.start_time }}">
-              </div>
-              <div class="field">
-                <label for="end_time">结束时间</label>
-                <input id="end_time" type="datetime-local" name="end_time" value="{{ form_data.end_time }}">
+                <label for="lookback_days">近几天</label>
+                <input id="lookback_days" type="number" name="lookback_days" min="1" step="1" value="{{ form_data.lookback_days }}" placeholder="例如 10">
               </div>
             </div>
             <div class="actions">
-              <div class="hint">默认展示最近 10 天的历史资金费率对冲结果。</div>
+              <div class="hint">输入近几天即可，结束时间默认取当前时刻。</div>
               <button type="submit">开始分析</button>
             </div>
           </form>
@@ -359,7 +346,6 @@
           <div class="alert error">{{ error }}</div>
           {% endif %}
         </section>
-      </div>
 
       {% if result %}
       <div class="results">
@@ -382,11 +368,30 @@
               </strong>
             </div>
             <div class="stat">
-              <small>总利差 (S-L)</small>
+              <small>选择区间累计利差 (S-L)</small>
               <strong class="{{ 'positive' if result.totals.spread > 0 else 'negative' if result.totals.spread < 0 else 'neutral' }}">
                 {{ '%.4f'|format(result.totals.spread) }}%
               </strong>
             </div>
+          </div>
+          <div class="summary-line">
+            <div class="summary-line-copy">
+              <small>历史推算日化</small>
+              <span>
+                {% if result.prediction.latest_spread is not none and result.prediction.settlements_per_day is not none and result.prediction.cycle_hours is not none %}
+                最新一笔资费差 {{ '%.4f'|format(result.prediction.latest_spread) }}% · 约 {{ '%.2f'|format(result.prediction.settlements_per_day) }} 次/天 · 约每 {{ '%.2f'|format(result.prediction.cycle_hours) }} 小时结算一次
+                {% else %}
+                当前同结算点数据不足，暂时无法推算预测日化
+                {% endif %}
+              </span>
+            </div>
+            <strong class="{{ 'positive' if result.prediction.predicted_daily_spread and result.prediction.predicted_daily_spread > 0 else 'negative' if result.prediction.predicted_daily_spread and result.prediction.predicted_daily_spread < 0 else 'neutral' }}">
+              {{ '-' if result.prediction.predicted_daily_spread is none else '%.4f'|format(result.prediction.predicted_daily_spread) ~ '%/天 · ' ~ '%.2f'|format(result.prediction.predicted_annualized_spread) ~ '%/年' }}
+            </strong>
+          </div>
+          <div class="alert {{ result.recommendation.tone }}">
+            <div><strong>{{ result.recommendation.title }}</strong></div>
+            <div>{{ result.recommendation.message }}</div>
           </div>
 
           {% if result.warnings %}
@@ -396,6 +401,74 @@
             {% endfor %}
           </div>
           {% endif %}
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <h2>当前周期快照</h2>
+            <span>按各交易所当前资费周期归一到 8H，再换算日化和年化</span>
+          </div>
+          <div class="snapshot-grid">
+            <div class="stat">
+              <small>8H 资费差 (S-L)</small>
+              <strong class="{{ 'positive' if result.current_snapshot.comparable_8h_spread and result.current_snapshot.comparable_8h_spread > 0 else 'negative' if result.current_snapshot.comparable_8h_spread and result.current_snapshot.comparable_8h_spread < 0 else 'neutral' }}">
+                {{ '-' if result.current_snapshot.comparable_8h_spread is none else '%.4f'|format(result.current_snapshot.comparable_8h_spread) ~ '%' }}
+              </strong>
+            </div>
+            <div class="stat">
+              <small>当前周期日化</small>
+              <strong class="{{ 'positive' if result.current_snapshot.comparable_daily_spread and result.current_snapshot.comparable_daily_spread > 0 else 'negative' if result.current_snapshot.comparable_daily_spread and result.current_snapshot.comparable_daily_spread < 0 else 'neutral' }}">
+                {{ '-' if result.current_snapshot.comparable_daily_spread is none else '%.4f'|format(result.current_snapshot.comparable_daily_spread) ~ '%/天' }}
+              </strong>
+            </div>
+            <div class="stat">
+              <small>当前周期年化</small>
+              <strong class="{{ 'positive' if result.current_snapshot.comparable_annualized_spread and result.current_snapshot.comparable_annualized_spread > 0 else 'negative' if result.current_snapshot.comparable_annualized_spread and result.current_snapshot.comparable_annualized_spread < 0 else 'neutral' }}">
+                {{ '-' if result.current_snapshot.comparable_annualized_spread is none else '%.2f'|format(result.current_snapshot.comparable_annualized_spread) ~ '%/年' }}
+              </strong>
+            </div>
+          </div>
+          <div style="overflow:auto; margin-top: 14px;">
+            <table class="snapshot-table">
+              <thead>
+                <tr>
+                  <th>方向</th>
+                  <th>交易所</th>
+                  <th>当前费率</th>
+                  <th>周期</th>
+                  <th>8H 归一</th>
+                  <th>日化</th>
+                  <th>年化</th>
+                  <th>标记/指数偏离</th>
+                  <th>下次结算</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>多</td>
+                  <td>{{ result.current_snapshot.long.exchange }}</td>
+                  <td class="{{ 'muted' if result.current_snapshot.long.current_rate is none else 'positive' if result.current_snapshot.long.current_rate > 0 else 'negative' if result.current_snapshot.long.current_rate < 0 else 'neutral' }}">{{ '-' if result.current_snapshot.long.current_rate is none else '%.4f'|format(result.current_snapshot.long.current_rate) ~ '%' }}</td>
+                  <td>{{ '-' if result.current_snapshot.long.cycle_hours is none else '%.2f'|format(result.current_snapshot.long.cycle_hours) ~ 'H' }}</td>
+                  <td class="{{ 'muted' if result.current_snapshot.long.normalized_8h_rate is none else 'positive' if result.current_snapshot.long.normalized_8h_rate > 0 else 'negative' if result.current_snapshot.long.normalized_8h_rate < 0 else 'neutral' }}">{{ '-' if result.current_snapshot.long.normalized_8h_rate is none else '%.4f'|format(result.current_snapshot.long.normalized_8h_rate) ~ '%' }}</td>
+                  <td class="{{ 'muted' if result.current_snapshot.long.dailyized_rate is none else 'positive' if result.current_snapshot.long.dailyized_rate > 0 else 'negative' if result.current_snapshot.long.dailyized_rate < 0 else 'neutral' }}">{{ '-' if result.current_snapshot.long.dailyized_rate is none else '%.4f'|format(result.current_snapshot.long.dailyized_rate) ~ '%/天' }}</td>
+                  <td class="{{ 'muted' if result.current_snapshot.long.annualized_rate is none else 'positive' if result.current_snapshot.long.annualized_rate > 0 else 'negative' if result.current_snapshot.long.annualized_rate < 0 else 'neutral' }}">{{ '-' if result.current_snapshot.long.annualized_rate is none else '%.2f'|format(result.current_snapshot.long.annualized_rate) ~ '%/年' }}</td>
+                  <td class="{{ 'muted' if result.current_snapshot.long.basis_percent is none else 'positive' if result.current_snapshot.long.basis_percent > 0 else 'negative' if result.current_snapshot.long.basis_percent < 0 else 'neutral' }}">{{ '-' if result.current_snapshot.long.basis_percent is none else '%.4f'|format(result.current_snapshot.long.basis_percent) ~ '%' }}</td>
+                  <td>{{ result.current_snapshot.long.next_funding_time or '-' }}</td>
+                </tr>
+                <tr>
+                  <td>空</td>
+                  <td>{{ result.current_snapshot.short.exchange }}</td>
+                  <td class="{{ 'muted' if result.current_snapshot.short.current_rate is none else 'positive' if result.current_snapshot.short.current_rate > 0 else 'negative' if result.current_snapshot.short.current_rate < 0 else 'neutral' }}">{{ '-' if result.current_snapshot.short.current_rate is none else '%.4f'|format(result.current_snapshot.short.current_rate) ~ '%' }}</td>
+                  <td>{{ '-' if result.current_snapshot.short.cycle_hours is none else '%.2f'|format(result.current_snapshot.short.cycle_hours) ~ 'H' }}</td>
+                  <td class="{{ 'muted' if result.current_snapshot.short.normalized_8h_rate is none else 'positive' if result.current_snapshot.short.normalized_8h_rate > 0 else 'negative' if result.current_snapshot.short.normalized_8h_rate < 0 else 'neutral' }}">{{ '-' if result.current_snapshot.short.normalized_8h_rate is none else '%.4f'|format(result.current_snapshot.short.normalized_8h_rate) ~ '%' }}</td>
+                  <td class="{{ 'muted' if result.current_snapshot.short.dailyized_rate is none else 'positive' if result.current_snapshot.short.dailyized_rate > 0 else 'negative' if result.current_snapshot.short.dailyized_rate < 0 else 'neutral' }}">{{ '-' if result.current_snapshot.short.dailyized_rate is none else '%.4f'|format(result.current_snapshot.short.dailyized_rate) ~ '%/天' }}</td>
+                  <td class="{{ 'muted' if result.current_snapshot.short.annualized_rate is none else 'positive' if result.current_snapshot.short.annualized_rate > 0 else 'negative' if result.current_snapshot.short.annualized_rate < 0 else 'neutral' }}">{{ '-' if result.current_snapshot.short.annualized_rate is none else '%.2f'|format(result.current_snapshot.short.annualized_rate) ~ '%/年' }}</td>
+                  <td class="{{ 'muted' if result.current_snapshot.short.basis_percent is none else 'positive' if result.current_snapshot.short.basis_percent > 0 else 'negative' if result.current_snapshot.short.basis_percent < 0 else 'neutral' }}">{{ '-' if result.current_snapshot.short.basis_percent is none else '%.4f'|format(result.current_snapshot.short.basis_percent) ~ '%' }}</td>
+                  <td>{{ result.current_snapshot.short.next_funding_time or '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <section class="panel">
@@ -414,7 +487,7 @@
                 </tr>
               </thead>
               <tbody>
-                {% for row in result.daily_rows %}
+                {% for row in result.daily_rows|reverse %}
                 <tr>
                   <td>{{ row.date }}</td>
                   <td class="{{ 'positive' if row.long_rate > 0 else 'negative' if row.long_rate < 0 else 'neutral' }}">{{ '%.4f'|format(row.long_rate) }}%</td>
@@ -443,7 +516,7 @@
                 </tr>
               </thead>
               <tbody>
-                {% for row in result.settlement_rows %}
+                {% for row in result.settlement_rows|reverse %}
                 <tr>
                   <td>{{ row.settlement_time }}</td>
                   <td class="{{ 'muted' if row.long_rate is none else 'positive' if row.long_rate > 0 else 'negative' if row.long_rate < 0 else 'neutral' }}">{{ '-' if row.long_rate is none else '%.4f'|format(row.long_rate) ~ '%' }}</td>

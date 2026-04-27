@@ -26,103 +26,58 @@
         margin: 0;
         font-family: "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
         color: var(--ink);
-        background:
-          radial-gradient(circle at top right, rgba(19, 111, 99, 0.15), transparent 28%),
-          linear-gradient(180deg, #f9f7f2 0%, #f1ede4 100%);
+        background: linear-gradient(180deg, #faf8f4 0%, #f3eee6 100%);
       }
 
       .page {
-        max-width: 1360px;
+        max-width: 1720px;
         margin: 0 auto;
-        padding: 32px 20px 56px;
+        padding: 20px 20px 40px;
       }
 
-      .hero {
+      .workspace {
         display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 24px;
-        align-items: stretch;
-        margin-bottom: 24px;
+        grid-template-columns: 340px minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
       }
 
-      .hero-card,
-      .panel {
-        background: rgba(255, 253, 248, 0.92);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(229, 221, 208, 0.95);
-        border-radius: 24px;
-        box-shadow: 0 20px 50px rgba(74, 58, 35, 0.08);
-      }
-
-      .hero-card {
-        padding: 28px;
-      }
-
-      .eyebrow {
-        display: inline-block;
-        padding: 8px 12px;
-        border-radius: 999px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      h1 {
-        margin: 18px 0 12px;
-        font-size: clamp(32px, 4vw, 52px);
-        line-height: 1.02;
-      }
-
-      .hero p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 16px;
-        line-height: 1.7;
-      }
-
-      .hero-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-        margin-top: 20px;
-      }
-
-      .mini-card {
-        padding: 14px 16px;
-        border-radius: 18px;
-        background: #f8f4ec;
-        border: 1px solid var(--line);
-      }
-
-      .mini-card strong {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 13px;
-      }
-
-      .mini-card span {
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.5;
+      .sidebar {
+        position: sticky;
+        top: 20px;
+        align-self: start;
+        min-width: 0;
       }
 
       .panel {
-        padding: 22px;
+        background: rgba(255, 253, 248, 0.98);
+        border: 1px solid rgba(225, 216, 201, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgba(80, 63, 37, 0.06);
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      .entry-panel {
+        margin-bottom: 0;
+      }
+
+      .entry-panel .form-grid {
+        grid-template-columns: 1fr;
       }
 
       .form-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
+        gap: 12px;
       }
 
       .field {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
       }
 
       .field.full {
@@ -130,31 +85,92 @@
       }
 
       .field label {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 700;
+        color: var(--muted);
       }
 
       .field input,
       .field select {
         width: 100%;
-        padding: 12px 14px;
-        border-radius: 14px;
+        height: 46px;
+        padding: 10px 12px;
+        border-radius: 12px;
         border: 1px solid var(--line);
-        background: white;
+        background: #fffdfa;
         color: var(--ink);
         font-size: 14px;
       }
 
+      .field input:focus,
+      .field select:focus {
+        outline: none;
+        border-color: rgba(19, 111, 99, 0.5);
+        box-shadow: 0 0 0 3px rgba(19, 111, 99, 0.08);
+      }
+
+      .entry-head {
+        display: grid;
+        gap: 4px;
+        margin-bottom: 14px;
+      }
+
+      .entry-head strong {
+        font-size: 18px;
+        line-height: 1.2;
+      }
+
+      .entry-head span {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .exchange-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr);
+        gap: 10px;
+        align-items: end;
+      }
+
+      .swap-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 2px;
+      }
+
+      .swap-button {
+        width: 42px;
+        min-width: 42px;
+        height: 42px;
+        min-height: 42px;
+        padding: 0;
+        border-radius: 12px;
+        border: 1px solid rgba(19, 111, 99, 0.16);
+        background: #eef7f5;
+        color: var(--accent);
+        box-shadow: none;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .swap-button:hover:not(:disabled) {
+        transform: none;
+        box-shadow: none;
+        background: #e4f3ef;
+      }
+
       .actions {
         display: grid;
-        gap: 14px;
-        margin-top: 20px;
+        gap: 10px;
+        margin-top: 14px;
       }
 
       .hint {
         color: var(--muted);
-        font-size: 13px;
-        line-height: 1.6;
+        font-size: 12px;
+        line-height: 1.55;
       }
 
       button {
@@ -163,18 +179,18 @@
         border-radius: 999px;
         background: linear-gradient(135deg, #0f766e 0%, #136f63 100%);
         color: white;
-        min-height: 56px;
-        padding: 0 24px;
-        font-size: 16px;
+        min-height: 48px;
+        padding: 0 22px;
+        font-size: 15px;
         font-weight: 700;
         cursor: pointer;
-        box-shadow: 0 16px 34px rgba(19, 111, 99, 0.22);
+        box-shadow: 0 10px 22px rgba(19, 111, 99, 0.18);
         transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
       }
 
       button:hover:not(:disabled) {
         transform: translateY(-1px);
-        box-shadow: 0 20px 38px rgba(19, 111, 99, 0.26);
+        box-shadow: 0 14px 28px rgba(19, 111, 99, 0.22);
       }
 
       button:disabled {
@@ -201,25 +217,58 @@
         border: 1px solid #f1dfb3;
       }
 
+      .alert.good {
+        background: #edf9f2;
+        color: #16613f;
+        border: 1px solid #b7e3c8;
+      }
+
+      .alert.info {
+        background: #eef6ff;
+        color: #1f4b7a;
+        border: 1px solid #cfe0f5;
+      }
+
       .results {
         display: none;
-        gap: 18px;
-        margin-top: 24px;
+        min-width: 0;
+        gap: 14px;
+        align-content: start;
       }
 
       .results.visible {
         display: grid;
       }
 
+      .results .panel {
+        padding: 16px 18px;
+        border-radius: 20px;
+      }
+
+      .overview-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.18fr) minmax(360px, 0.82fr);
+        gap: 14px;
+        align-items: stretch;
+      }
+
+      .summary-panel {
+        min-width: 0;
+      }
+
+      .snapshot-panel {
+        min-width: 0;
+      }
+
       .summary-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 14px;
+        gap: 10px;
       }
 
       .stat {
-        padding: 18px;
-        border-radius: 18px;
+        padding: 12px 14px;
+        border-radius: 14px;
         background: #faf6ef;
         border: 1px solid var(--line);
       }
@@ -228,31 +277,30 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 10px;
+        gap: 8px;
+        margin-bottom: 8px;
       }
 
       .stat small {
         color: var(--muted);
-        font-size: 12px;
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.04em;
       }
 
       .stat strong {
-        font-size: 28px;
+        font-size: 22px;
+        line-height: 1.1;
       }
 
       .summary-line {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 18px;
-        margin-top: 14px;
-        padding: 18px;
-        border-radius: 18px;
+        display: grid;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 14px;
         background: #f8f4ec;
         border: 1px dashed var(--line);
+        height: 100%;
       }
 
       .summary-line-copy {
@@ -263,30 +311,60 @@
 
       .summary-line-copy small {
         color: var(--muted);
-        font-size: 12px;
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.04em;
       }
 
       .summary-line-copy span {
         color: var(--muted);
-        font-size: 13px;
-        line-height: 1.5;
+        font-size: 11px;
+        line-height: 1.45;
       }
 
       .summary-line strong {
-        font-size: 30px;
-        white-space: nowrap;
+        font-size: 25px;
+        line-height: 1.05;
+        letter-spacing: 0;
+        white-space: normal;
+        text-align: left;
+      }
+
+      .summary-aux {
+        display: grid;
+        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+        gap: 10px;
+        margin-top: 10px;
+        align-items: stretch;
+      }
+
+      .tables-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.84fr) minmax(0, 1.16fr);
+        gap: 14px;
+      }
+
+      #recommendation-box .alert,
+      #warning-box .alert {
+        margin: 0;
+      }
+
+      #recommendation-box .alert {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 8px;
       }
 
       .tag {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 28px;
-        padding: 6px 10px;
+        min-height: 24px;
+        padding: 4px 8px;
         border-radius: 999px;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
         white-space: nowrap;
         border: 1px solid transparent;
@@ -326,12 +404,12 @@
       table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 14px;
+        font-size: 13px;
       }
 
       th,
       td {
-        padding: 12px 10px;
+        padding: 9px 8px;
         border-bottom: 1px solid var(--line);
         text-align: right;
         white-space: nowrap;
@@ -344,183 +422,380 @@
 
       th {
         color: var(--muted);
-        font-size: 12px;
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.04em;
       }
 
       .section-head {
         display: flex;
         justify-content: space-between;
-        align-items: baseline;
-        gap: 12px;
-        margin-bottom: 12px;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
       }
 
       .section-head h2 {
         margin: 0;
-        font-size: 20px;
+        font-size: 16px;
       }
 
       .section-head span {
         color: var(--muted);
+        font-size: 11px;
+      }
+
+      .alert {
+        padding: 10px 12px;
+        border-radius: 14px;
         font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .snapshot-metric-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 2px;
+      }
+
+      .snapshot-metric-row {
+        display: grid;
+        gap: 4px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: #faf6ef;
+        border: 1px solid rgba(229, 221, 208, 0.9);
+      }
+
+      .snapshot-metric-row:last-child {
+        padding-bottom: 10px;
+      }
+
+      .snapshot-metric-row small {
+        color: var(--muted);
+        font-size: 10px;
+        letter-spacing: 0.04em;
+      }
+
+      .snapshot-metric-row strong {
+        font-size: 19px;
+        line-height: 1.1;
+        text-align: left;
+      }
+
+      .snapshot-side-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .snapshot-side-card {
+        display: grid;
+        gap: 10px;
+        padding: 12px;
+        border-radius: 14px;
+        background: #fffdfa;
+        border: 1px solid var(--line);
+      }
+
+      .snapshot-side-card.long {
+        border-color: rgba(15, 159, 99, 0.18);
+        background: linear-gradient(180deg, rgba(237, 249, 242, 0.55) 0%, #fffdfa 100%);
+      }
+
+      .snapshot-side-card.short {
+        border-color: rgba(209, 67, 67, 0.16);
+        background: linear-gradient(180deg, rgba(255, 241, 241, 0.52) 0%, #fffdfa 100%);
+      }
+
+      .snapshot-side-head {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+      }
+
+      .snapshot-side-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 24px;
+        padding: 0 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        border: 1px solid transparent;
+      }
+
+      .snapshot-side-badge.long {
+        background: rgba(15, 159, 99, 0.1);
+        color: var(--good);
+        border-color: rgba(15, 159, 99, 0.18);
+      }
+
+      .snapshot-side-badge.short {
+        background: rgba(209, 67, 67, 0.1);
+        color: var(--bad);
+        border-color: rgba(209, 67, 67, 0.16);
+      }
+
+      .snapshot-side-labels {
+        min-width: 0;
+      }
+
+      .snapshot-side-title {
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+
+      .snapshot-side-meta {
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.4;
+        margin-top: 2px;
+      }
+
+      .snapshot-side-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px 10px;
+      }
+
+      .snapshot-side-item {
+        min-width: 0;
+        display: grid;
+        gap: 3px;
+      }
+
+      .snapshot-side-item.full {
+        grid-column: 1 / -1;
+      }
+
+      .snapshot-side-item small {
+        display: block;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.3;
+        margin-bottom: 2px;
+      }
+
+      .snapshot-side-item strong {
+        display: block;
+        font-size: 12px;
+        line-height: 1.25;
+      }
+
+      @media (max-width: 1480px) {
+        .overview-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 1320px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          position: static;
+        }
+
+        .entry-panel .form-grid,
+        .tables-grid {
+          grid-template-columns: 1fr;
+        }
       }
 
       @media (max-width: 960px) {
-        .hero,
         .summary-grid {
           grid-template-columns: 1fr;
         }
 
-        .summary-line {
-          align-items: flex-start;
-          flex-direction: column;
+        .summary-aux {
+          grid-template-columns: 1fr;
         }
 
-        .summary-line strong {
-          white-space: normal;
+        .snapshot-metric-list {
+          grid-template-columns: 1fr;
+        }
+
+        .snapshot-side-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .summary-line {
+          gap: 8px;
         }
       }
 
       @media (max-width: 560px) {
-        .form-grid {
+        .form-grid,
+        .exchange-grid,
+        .snapshot-side-grid {
           grid-template-columns: 1fr;
+        }
+
+        .swap-wrap {
+          justify-content: flex-start;
+          padding-bottom: 0;
         }
       }
     </style>
   </head>
   <body>
     <div class="page">
-      <div class="hero">
-        <section class="hero-card">
-          <span class="eyebrow">Pure Local HTML</span>
-          <h1>跨所资金费率对冲分析</h1>
-          <p>这是一个纯本地网页版本，不依赖 Flask 服务。直接打开这个 `index.html` 文件，就可以在浏览器里请求交易所公开接口并分析资金费率差。</p>
-          <div class="hero-grid">
-            <div class="mini-card">
-              <strong>对冲视角</strong>
-              <span>默认使用 `做空费率 - 做多费率` 作为利差，正数代表组合更有利。</span>
-            </div>
-            <div class="mini-card">
-              <strong>注意事项</strong>
-              <span>若某些交易所接口限制浏览器跨域，请求会在页面里直接提示，不会静默吞掉。</span>
-            </div>
+      <div class="workspace">
+        <aside class="sidebar">
+        <section class="panel entry-panel">
+          <div class="entry-head">
+            <strong>查询条件</strong>
+            <span>选择币种、做多 / 做空交易所和回看天数</span>
           </div>
-        </section>
-
-        <section class="panel">
           <form id="analysis-form">
             <div class="form-grid">
               <div class="field full">
                 <label for="symbol">币种</label>
                 <input id="symbol" name="symbol" placeholder="例如 KAT">
               </div>
-              <div class="field">
-                <label for="long_exchange">做多交易所</label>
-                <select id="long_exchange" name="long_exchange"></select>
+              <div class="exchange-grid field full">
+                <div class="field">
+                  <label for="long_exchange">做多交易所</label>
+                  <select id="long_exchange" name="long_exchange"></select>
+                </div>
+                <div class="swap-wrap">
+                  <button id="swap-exchanges" class="swap-button" type="button" aria-label="互换多空交易所">⇄</button>
+                </div>
+                <div class="field">
+                  <label for="short_exchange">做空交易所</label>
+                  <select id="short_exchange" name="short_exchange"></select>
+                </div>
               </div>
-              <div class="field">
-                <label for="short_exchange">做空交易所</label>
-                <select id="short_exchange" name="short_exchange"></select>
-              </div>
-              <div class="field">
-                <label for="start_time">开始时间</label>
-                <input id="start_time" type="datetime-local" name="start_time">
-              </div>
-              <div class="field">
-                <label for="end_time">结束时间</label>
-                <input id="end_time" type="datetime-local" name="end_time">
+              <div class="field full">
+                <label for="lookback_days">近几天</label>
+                <input id="lookback_days" type="number" name="lookback_days" min="1" step="1" placeholder="例如 10">
               </div>
             </div>
             <div class="actions">
-              <div class="hint">默认展示最近 10 天。直接双击打开当前文件即可使用，不需要本地端口。</div>
+              <div class="hint">结束时间默认取当前时刻，支持一键互换多空交易所。</div>
               <button id="run-button" type="submit">开始分析</button>
             </div>
           </form>
 
           <div id="error-box"></div>
         </section>
-      </div>
+        </aside>
 
       <div id="results" class="results">
-        <section class="panel">
-          <div class="section-head">
-            <h2 id="result-title">分析结果</h2>
-            <span id="result-meta"></span>
-          </div>
-          <div class="summary-grid">
-            <div class="stat">
-              <div class="stat-head">
-                <small id="summary-long-label"></small>
-                <span id="summary-long-tag" class="tag neutral">持平</span>
+        <div class="overview-grid">
+          <section class="panel summary-panel">
+            <div class="section-head">
+              <h2 id="result-title">分析结果</h2>
+              <span id="result-meta"></span>
+            </div>
+            <div class="summary-grid">
+              <div class="stat">
+                <div class="stat-head">
+                  <small id="summary-long-label"></small>
+                  <span id="summary-long-tag" class="tag neutral">持平</span>
+                </div>
+                <strong id="summary-long-value"></strong>
               </div>
-              <strong id="summary-long-value"></strong>
-            </div>
-            <div class="stat">
-              <div class="stat-head">
-                <small id="summary-short-label"></small>
-                <span id="summary-short-tag" class="tag neutral">持平</span>
+              <div class="stat">
+                <div class="stat-head">
+                  <small id="summary-short-label"></small>
+                  <span id="summary-short-tag" class="tag neutral">持平</span>
+                </div>
+                <strong id="summary-short-value"></strong>
               </div>
-              <strong id="summary-short-value"></strong>
-            </div>
-            <div class="stat">
-              <div class="stat-head">
-                <small>总利差 (S-L)</small>
-                <span id="summary-spread-tag" class="tag neutral">持平</span>
+              <div class="stat">
+                <div class="stat-head">
+                  <small id="summary-spread-label">选择区间累计利差 (S-L)</small>
+                  <span id="summary-spread-tag" class="tag neutral">持平</span>
+                </div>
+                <strong id="summary-spread-value"></strong>
               </div>
-              <strong id="summary-spread-value"></strong>
             </div>
-          </div>
-          <div class="summary-line">
-            <div class="summary-line-copy">
-              <small>当前资费差估算日利息</small>
-              <span id="summary-daily-interest-meta"></span>
+            <div class="summary-aux">
+              <div class="summary-line">
+                <div class="summary-line-copy">
+                  <small>历史推算日化</small>
+                  <span id="summary-daily-interest-meta"></span>
+                </div>
+                <strong id="summary-daily-interest-value"></strong>
+              </div>
+              <div id="recommendation-box"></div>
             </div>
-            <strong id="summary-daily-interest-value"></strong>
-          </div>
-          <div id="warning-box"></div>
-        </section>
+            <div id="warning-box"></div>
+          </section>
 
-        <section class="panel">
-          <div class="section-head">
-            <h2>每日汇总统计</h2>
-            <span>00:00 结算默认归到前一天</span>
-          </div>
-          <div style="overflow:auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th>统计日期</th>
-                  <th id="daily-long-header"></th>
-                  <th id="daily-short-header"></th>
-                  <th>当日总利差</th>
-                </tr>
-              </thead>
-              <tbody id="daily-table-body"></tbody>
-            </table>
-          </div>
-        </section>
+          <section class="panel snapshot-panel">
+            <div class="section-head">
+              <h2>当前周期快照</h2>
+              <span>按当前周期归一到 8H / 天 / 年</span>
+            </div>
+            <div class="snapshot-metric-list">
+              <div class="snapshot-metric-row">
+                <small>8H 资费差 (S-L)</small>
+                <strong id="snapshot-8h-spread-value"></strong>
+              </div>
+              <div class="snapshot-metric-row">
+                <small>当前周期日化</small>
+                <strong id="snapshot-daily-spread-value"></strong>
+              </div>
+              <div class="snapshot-metric-row">
+                <small>当前周期年化</small>
+                <strong id="snapshot-annual-spread-value"></strong>
+              </div>
+            </div>
+            <div id="snapshot-side-list" class="snapshot-side-list"></div>
+          </section>
+        </div>
 
-        <section class="panel">
-          <div class="section-head">
-            <h2>详细结算明细</h2>
-            <span>仅在两边同一结算时刻都存在数据时才计算利差</span>
-          </div>
-          <div style="overflow:auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th>结算时间</th>
-                  <th id="settlement-long-header"></th>
-                  <th id="settlement-short-header"></th>
-                  <th>利差 % (S-L)</th>
-                </tr>
-              </thead>
-              <tbody id="settlement-table-body"></tbody>
-            </table>
-          </div>
-        </section>
+        <div class="tables-grid">
+          <section class="panel">
+            <div class="section-head">
+              <h2>每日汇总统计</h2>
+              <span>00:00 结算默认归到前一天</span>
+            </div>
+            <div style="overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>统计日期</th>
+                    <th id="daily-long-header"></th>
+                    <th id="daily-short-header"></th>
+                    <th>当日总利差</th>
+                  </tr>
+                </thead>
+                <tbody id="daily-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <h2>详细结算明细</h2>
+              <span>仅在两边同一结算时刻都存在数据时才计算利差</span>
+            </div>
+            <div style="overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>结算时间</th>
+                    <th id="settlement-long-header"></th>
+                    <th id="settlement-short-header"></th>
+                    <th>利差 % (S-L)</th>
+                  </tr>
+                </thead>
+                <tbody id="settlement-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
       </div>
     </div>
 
@@ -537,19 +812,17 @@
       const symbolInput = document.getElementById("symbol");
       const longExchangeSelect = document.getElementById("long_exchange");
       const shortExchangeSelect = document.getElementById("short_exchange");
-      const startTimeInput = document.getElementById("start_time");
-      const endTimeInput = document.getElementById("end_time");
+      const lookbackDaysInput = document.getElementById("lookback_days");
+      const swapExchangesButton = document.getElementById("swap-exchanges");
       const runButton = document.getElementById("run-button");
       const resultsEl = document.getElementById("results");
       const errorBox = document.getElementById("error-box");
       const warningBox = document.getElementById("warning-box");
+      const recommendationBox = document.getElementById("recommendation-box");
+      const snapshotSideList = document.getElementById("snapshot-side-list");
 
       function pad(value) {
         return String(value).padStart(2, "0");
-      }
-
-      function formatDateTimeLocal(date) {
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
       }
 
       function formatDateTimeDisplay(date) {
@@ -558,6 +831,15 @@
 
       function formatDateDisplay(date) {
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+      }
+
+      function normalizeSettlementTime(date) {
+        const normalized = new Date(date.getTime());
+        if (normalized.getSeconds() >= 59) {
+          normalized.setMinutes(normalized.getMinutes() + 1);
+        }
+        normalized.setSeconds(0, 0);
+        return normalized;
       }
 
       function toClassName(value) {
@@ -613,6 +895,32 @@
         return `${value.toFixed(4)}%/天`;
       }
 
+      function formatPercentPerYear(value) {
+        if (value === null || value === undefined) return "-";
+        return `${value.toFixed(2)}%/年`;
+      }
+
+      function formatHours(value) {
+        if (value === null || value === undefined || !Number.isFinite(value)) return "-";
+        return `${value.toFixed(2)} 小时`;
+      }
+
+      function formatCycle(value) {
+        if (value === null || value === undefined || !Number.isFinite(value)) return "-";
+        return `${value.toFixed(2)}H`;
+      }
+
+      function percentile(values, quantile) {
+        if (!values || values.length === 0) return null;
+        const sorted = [...values].sort((a, b) => a - b);
+        if (sorted.length === 1) return sorted[0];
+        const index = (sorted.length - 1) * quantile;
+        const lower = Math.floor(index);
+        const upper = Math.min(lower + 1, sorted.length - 1);
+        const weight = index - lower;
+        return sorted[lower] + (sorted[upper] - sorted[lower]) * weight;
+      }
+
       function setAlert(container, type, messages) {
         if (!messages || messages.length === 0) {
           container.innerHTML = "";
@@ -630,14 +938,16 @@
       }
 
       function setDefaultFormValues() {
-        const endTime = new Date();
-        endTime.setSeconds(0, 0);
-        const startTime = new Date(endTime.getTime() - 10 * 24 * 60 * 60 * 1000);
         symbolInput.value = "KAT";
         longExchangeSelect.value = "bybit";
         shortExchangeSelect.value = "binance";
-        startTimeInput.value = formatDateTimeLocal(startTime);
-        endTimeInput.value = formatDateTimeLocal(endTime);
+        lookbackDaysInput.value = "10";
+      }
+
+      function swapSelectedExchanges() {
+        const currentLong = longExchangeSelect.value;
+        longExchangeSelect.value = shortExchangeSelect.value;
+        shortExchangeSelect.value = currentLong;
       }
 
       async function fetchJson(url, params) {
@@ -663,8 +973,7 @@
           });
           if (Array.isArray(data)) {
             for (const item of data) {
-              const date = new Date(Number(item.fundingTime));
-              date.setSeconds(0, 0);
+              const date = normalizeSettlementTime(new Date(Number(item.fundingTime)));
               rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
             }
           }
@@ -687,7 +996,7 @@
           const payload = data?.data ?? {};
           const list = Array.isArray(payload.resultList) ? payload.resultList : [];
           for (const item of list) {
-            const date = new Date(Number(item.fundingRateTimestamp));
+            const date = normalizeSettlementTime(new Date(Number(item.fundingRateTimestamp)));
             if (date < startDate || date > new Date(endDate.getTime() + 2000)) continue;
             rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
           }
@@ -708,7 +1017,7 @@
           });
           const list = Array.isArray(data?.result?.list) ? data.result.list : [];
           for (const item of list) {
-            const date = new Date(Number(item.fundingRateTimestamp));
+            const date = normalizeSettlementTime(new Date(Number(item.fundingRateTimestamp)));
             if (date < startDate || date > new Date(endDate.getTime() + 2000)) continue;
             rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
           }
@@ -733,7 +1042,7 @@
             }
             const items = Array.isArray(data?.data) ? data.data : [];
             for (const item of items) {
-              const date = new Date(Number(item.fundingTime));
+              const date = normalizeSettlementTime(new Date(Number(item.fundingTime)));
               if (date < startDate || date > endDate) continue;
               rates.push({ time: date, rate: Number(item.realizedRate) * 100 });
             }
@@ -756,8 +1065,7 @@
           });
           const list = Array.isArray(data) ? data : [];
           for (const item of list) {
-            const date = new Date(Number(item.t) * 1000);
-            date.setSeconds(0, 0);
+            const date = normalizeSettlementTime(new Date(Number(item.t) * 1000));
             if (date < startDate || date > endDate) continue;
             rates.push({ time: date, rate: Number(item.r) * 100 });
           }
@@ -767,6 +1075,130 @@
         return rates;
       }
 
+      async function getBinanceCurrentSnapshot(symbol, historicalRows, warnings) {
+        try {
+          const [current, history] = await Promise.all([
+            fetchJson("https://fapi.binance.com/fapi/v1/premiumIndex", {
+              symbol: `${symbol}USDT`,
+            }),
+            fetchJson("https://fapi.binance.com/fapi/v1/fundingRate", {
+              symbol: `${symbol}USDT`,
+              limit: "5",
+            }),
+          ]);
+
+          const historicalTimes = Array.isArray(history)
+            ? history.map((item) => normalizeSettlementTime(new Date(Number(item.fundingTime))).getTime())
+            : historicalRows.map((row) => row.time.getTime());
+          const cycleHours = inferCycleHours(historicalTimes);
+
+          return buildCurrentSnapshot({
+            exchange: "binance",
+            currentRate: Number(current.lastFundingRate) * 100,
+            cycleHours,
+            markPrice: Number(current.markPrice),
+            indexPrice: Number(current.indexPrice),
+            nextFundingTime: formatDateTimeDisplay(new Date(Number(current.nextFundingTime))),
+          });
+        } catch (error) {
+          warnings.push(`BINANCE 当前周期快照获取失败: ${error.message}`);
+          return buildCurrentSnapshot({ exchange: "binance" });
+        }
+      }
+
+      async function getBybitCurrentSnapshot(symbol, warnings) {
+        try {
+          const data = await fetchJson("https://api.bybit.com/v5/market/tickers", {
+            category: "linear",
+            symbol: `${symbol}USDT`,
+          });
+          const item = Array.isArray(data?.result?.list) ? data.result.list[0] : null;
+          if (!item) throw new Error("empty response");
+          return buildCurrentSnapshot({
+            exchange: "bybit",
+            currentRate: Number(item.fundingRate) * 100,
+            cycleHours: Number(item.fundingIntervalHour),
+            markPrice: Number(item.markPrice),
+            indexPrice: Number(item.indexPrice),
+            nextFundingTime: formatDateTimeDisplay(new Date(Number(item.nextFundingTime))),
+          });
+        } catch (error) {
+          warnings.push(`BYBIT 当前周期快照获取失败: ${error.message}`);
+          return buildCurrentSnapshot({ exchange: "bybit" });
+        }
+      }
+
+      async function getBitgetCurrentSnapshot(symbol, warnings) {
+        try {
+          const [funding, ticker] = await Promise.all([
+            fetchJson("https://api.bitget.com/api/v3/market/current-fund-rate", {
+              symbol: `${symbol}USDT`,
+            }),
+            fetchJson("https://api.bitget.com/api/v2/mix/market/ticker", {
+              symbol: `${symbol}USDT`,
+              productType: "USDT-FUTURES",
+            }),
+          ]);
+          const fundingItem = Array.isArray(funding?.data) ? funding.data[0] : null;
+          const tickerItem = Array.isArray(ticker?.data) ? ticker.data[0] : null;
+          if (!fundingItem || !tickerItem) throw new Error("empty response");
+          return buildCurrentSnapshot({
+            exchange: "bitget",
+            currentRate: Number(fundingItem.fundingRate) * 100,
+            cycleHours: Number(fundingItem.fundingRateInterval),
+            markPrice: Number(tickerItem.markPrice),
+            indexPrice: Number(tickerItem.indexPrice),
+            nextFundingTime: formatDateTimeDisplay(new Date(Number(fundingItem.nextUpdate))),
+          });
+        } catch (error) {
+          warnings.push(`BITGET 当前周期快照获取失败: ${error.message}`);
+          return buildCurrentSnapshot({ exchange: "bitget" });
+        }
+      }
+
+      async function getOkxCurrentSnapshot(symbol, historicalRows, warnings) {
+        const candidates = [`${symbol}-USD-SWAP`, `${symbol}-USDT-SWAP`];
+        for (const instId of candidates) {
+          try {
+            const [funding, mark] = await Promise.all([
+              fetchJson("https://www.okx.com/api/v5/public/funding-rate", { instId }),
+              fetchJson("https://www.okx.com/api/v5/public/mark-price", { instType: "SWAP", instId }),
+            ]);
+            const fundingItem = Array.isArray(funding?.data) ? funding.data[0] : null;
+            const markItem = Array.isArray(mark?.data) ? mark.data[0] : null;
+            if (!fundingItem) continue;
+            return buildCurrentSnapshot({
+              exchange: "okx",
+              currentRate: Number(fundingItem.fundingRate) * 100,
+              cycleHours: inferCycleHours(historicalRows.map((row) => row.time.getTime())),
+              markPrice: markItem ? Number(markItem.markPx) : null,
+              indexPrice: null,
+              nextFundingTime: formatDateTimeDisplay(new Date(Number(fundingItem.nextFundingTime))),
+            });
+          } catch (_error) {
+          }
+        }
+        warnings.push("OKX 当前周期快照获取失败: 当前合约或快照数据不可用");
+        return buildCurrentSnapshot({ exchange: "okx" });
+      }
+
+      async function getGateioCurrentSnapshot(symbol, warnings) {
+        try {
+          const item = await fetchJson(`https://api.gateio.ws/api/v4/futures/usdt/contracts/${symbol}_USDT`, {});
+          return buildCurrentSnapshot({
+            exchange: "gateio",
+            currentRate: Number(item.funding_rate) * 100,
+            cycleHours: Number(item.funding_interval) / 3600,
+            markPrice: Number(item.mark_price),
+            indexPrice: Number(item.index_price),
+            nextFundingTime: formatDateTimeDisplay(new Date(Number(item.funding_next_apply) * 1000)),
+          });
+        } catch (error) {
+          warnings.push(`GATEIO 当前周期快照获取失败: ${error.message}`);
+          return buildCurrentSnapshot({ exchange: "gateio" });
+        }
+      }
+
       const exchangeFetchers = {
         binance: getBinanceFundingRates,
         bybit: getBybitFundingRates,
@@ -774,6 +1206,119 @@
         okx: getOkxFundingRates,
         gateio: getGateioFundingRates,
       };
+
+      const currentSnapshotFetchers = {
+        binance: getBinanceCurrentSnapshot,
+        bybit: (symbol, _historicalRows, warnings) => getBybitCurrentSnapshot(symbol, warnings),
+        bitget: (symbol, _historicalRows, warnings) => getBitgetCurrentSnapshot(symbol, warnings),
+        okx: getOkxCurrentSnapshot,
+        gateio: (symbol, _historicalRows, warnings) => getGateioCurrentSnapshot(symbol, warnings),
+      };
+
+      function inferCycleHours(timestamps) {
+        const uniq = [...new Set(timestamps)].sort((a, b) => a - b);
+        if (uniq.length < 2) return null;
+        const intervals = [];
+        for (let index = 1; index < uniq.length; index += 1) {
+          const diff = uniq[index] - uniq[index - 1];
+          if (diff > 0) intervals.push(diff / (60 * 60 * 1000));
+        }
+        if (intervals.length === 0) return null;
+        intervals.sort((a, b) => a - b);
+        return intervals[Math.floor(intervals.length / 2)];
+      }
+
+      function calcBasisPercent(markPrice, indexPrice) {
+        if (
+          markPrice === null || markPrice === undefined ||
+          indexPrice === null || indexPrice === undefined ||
+          indexPrice === 0
+        ) {
+          return null;
+        }
+        return ((markPrice - indexPrice) / indexPrice) * 100;
+      }
+
+      function buildCurrentSnapshot({
+        exchange,
+        currentRate = null,
+        cycleHours = null,
+        markPrice = null,
+        indexPrice = null,
+        nextFundingTime = null,
+      }) {
+        const normalized8hRate =
+          currentRate !== null && cycleHours !== null && cycleHours !== 0
+            ? currentRate * (8 / cycleHours)
+            : null;
+        const dailyizedRate =
+          currentRate !== null && cycleHours !== null && cycleHours !== 0
+            ? currentRate * (24 / cycleHours)
+            : null;
+        const annualizedRate = dailyizedRate !== null ? dailyizedRate * 365 : null;
+        return {
+          exchange,
+          currentRate,
+          cycleHours,
+          normalized8hRate,
+          dailyizedRate,
+          annualizedRate,
+          markPrice,
+          indexPrice,
+          basisPercent: calcBasisPercent(markPrice, indexPrice),
+          nextFundingTime,
+        };
+      }
+
+      function buildRecommendation(dailyRows, prediction) {
+        const dailySpreads = dailyRows
+          .map((row) => row.spread)
+          .filter((value) => value !== null && Number.isFinite(value));
+
+        if (dailySpreads.length < 3 || prediction.predictedDailySpread === null) {
+          return {
+            tone: "warn",
+            title: "历史建议：先观望",
+            message: "同结算点历史样本不足，暂时无法结合资费周期和历史分布给出可靠建议。",
+          };
+        }
+
+        const medianDailySpread = percentile(dailySpreads, 0.5);
+        const upperQuartileDailySpread = percentile(dailySpreads, 0.75);
+        const positiveRatio = dailySpreads.filter((value) => value > 0).length / dailySpreads.length;
+        const positiveRatioPct = Math.round(positiveRatio * 100);
+        const predictedDailySpread = prediction.predictedDailySpread;
+
+        if (predictedDailySpread <= 0) {
+          return {
+            tone: "error",
+            title: "历史建议：暂不进入",
+            message: `当前预测当日总利差为 ${formatPercent(predictedDailySpread)}，低于 0；历史正收益日占比约 ${positiveRatioPct}%。更适合先观望，等待资费重新转正后再评估。`,
+          };
+        }
+
+        if (positiveRatio >= 0.6 && predictedDailySpread >= upperQuartileDailySpread) {
+          return {
+            tone: "good",
+            title: "历史建议：可以考虑进入",
+            message: `历史正收益日占比约 ${positiveRatioPct}%，当前预测当日总利差 ${formatPercent(predictedDailySpread)} 高于历史 75 分位 ${formatPercent(upperQuartileDailySpread)}。若手续费、滑点和资金占用成本可控，可考虑现在进入套取资费。`,
+          };
+        }
+
+        if (positiveRatio >= 0.55 && predictedDailySpread >= medianDailySpread) {
+          return {
+            tone: "info",
+            title: "历史建议：有条件参与",
+            message: `历史正收益日占比约 ${positiveRatioPct}%，当前预测当日总利差 ${formatPercent(predictedDailySpread)} 高于历史中位 ${formatPercent(medianDailySpread)}，但还没有进入最强区间。更适合轻仓试探，或等待更好的资费窗口。`,
+          };
+        }
+
+        return {
+          tone: "warn",
+          title: "历史建议：继续观察",
+          message: `当前预测当日总利差 ${formatPercent(predictedDailySpread)} 未明显高于历史中位 ${formatPercent(medianDailySpread)}，历史正收益日占比约 ${positiveRatioPct}%。相比马上进入，更适合继续等待更好的价差和资费位置。`,
+        };
+      }
 
       async function analyzeFundingRates({ symbol, longExchange, shortExchange, startDate, endDate }) {
         if (!symbol) throw new Error("币种不能为空");
@@ -785,6 +1330,10 @@
         const [longRaw, shortRaw] = await Promise.all([
           exchangeFetchers[longExchange](symbol, startDate, endDate, warnings),
           exchangeFetchers[shortExchange](symbol, startDate, endDate, warnings),
+        ]);
+        const [longCurrentSnapshot, shortCurrentSnapshot] = await Promise.all([
+          currentSnapshotFetchers[longExchange](symbol, longRaw, warnings),
+          currentSnapshotFetchers[shortExchange](symbol, shortRaw, warnings),
         ]);
 
         const merged = new Map();
@@ -870,6 +1419,10 @@
           currentSpread !== null && settlementsPerDay !== null
             ? currentSpread * settlementsPerDay
             : null;
+        const predictedAnnualizedSpread =
+          estimatedDailyInterest !== null ? estimatedDailyInterest * 365 : null;
+        const cycleHours =
+          settlementsPerDay !== null && settlementsPerDay > 0 ? 24 / settlementsPerDay : null;
 
         const dailyRows = Array.from(dailyStats.entries())
           .sort((a, b) => a[0].localeCompare(b[0]))
@@ -880,6 +1433,26 @@
             spread: values.shortRate - values.longRate,
           }));
 
+        const prediction = {
+          latestSpread: currentSpread,
+          settlementsPerDay,
+          cycleHours,
+          predictedDailySpread: estimatedDailyInterest,
+          predictedAnnualizedSpread,
+        };
+        const currentSnapshot = {
+          long: longCurrentSnapshot,
+          short: shortCurrentSnapshot,
+          comparable8hSpread:
+            longCurrentSnapshot.normalized8hRate !== null && shortCurrentSnapshot.normalized8hRate !== null
+              ? shortCurrentSnapshot.normalized8hRate - longCurrentSnapshot.normalized8hRate
+              : null,
+        };
+        currentSnapshot.comparableDailySpread =
+          currentSnapshot.comparable8hSpread !== null ? currentSnapshot.comparable8hSpread * 3 : null;
+        currentSnapshot.comparableAnnualizedSpread =
+          currentSnapshot.comparableDailySpread !== null ? currentSnapshot.comparableDailySpread * 365 : null;
+
         return {
           symbol,
           longExchange,
@@ -888,15 +1461,13 @@
           endTime: formatDateTimeDisplay(endDate),
           settlementRows,
           dailyRows,
+          prediction,
+          currentSnapshot,
+          recommendation: buildRecommendation(dailyRows, prediction),
           totals: {
             longRate: totalLong,
             shortRate: totalShort,
             spread: totalShort - totalLong,
-          },
-          current: {
-            spread: currentSpread,
-            settlementsPerDay,
-            estimatedDailyInterest,
           },
           warnings,
         };
@@ -913,6 +1484,7 @@
 
         document.getElementById("summary-long-label").textContent = `${longLabel} 累计`;
         document.getElementById("summary-short-label").textContent = `${shortLabel} 累计`;
+        document.getElementById("summary-spread-label").textContent = "选择区间累计利差 (S-L)";
 
         const longValue = document.getElementById("summary-long-value");
         const shortValue = document.getElementById("summary-short-value");
@@ -922,16 +1494,21 @@
         const spreadTag = document.getElementById("summary-spread-tag");
         const dailyInterestValue = document.getElementById("summary-daily-interest-value");
         const dailyInterestMeta = document.getElementById("summary-daily-interest-meta");
+        const predictedDailySpread = result.prediction ? result.prediction.predictedDailySpread : null;
+        const predictedAnnualizedSpread = result.prediction ? result.prediction.predictedAnnualizedSpread : null;
 
         longValue.textContent = formatPercent(longImpact);
         shortValue.textContent = formatPercent(shortImpact);
         spreadValue.textContent = formatPercent(result.totals.spread);
-        dailyInterestValue.textContent = formatPercentPerDay(result.current.estimatedDailyInterest);
+        dailyInterestValue.textContent =
+          predictedDailySpread === null
+            ? "-"
+            : `${formatPercentPerDay(predictedDailySpread)} · ${formatPercentPerYear(predictedAnnualizedSpread)}`;
 
         longValue.className = toClassName(longImpact);
         shortValue.className = toClassName(shortImpact);
         spreadValue.className = toClassName(result.totals.spread);
-        dailyInterestValue.className = toClassName(result.current.estimatedDailyInterest);
+        dailyInterestValue.className = toClassName(predictedDailySpread);
 
         const longTagInfo = getFundingTag(longImpact);
         const shortTagInfo = getFundingTag(shortImpact);
@@ -945,9 +1522,75 @@
         spreadTag.className = `tag ${spreadTagInfo.className}`;
 
         dailyInterestMeta.textContent =
-          result.current.spread !== null && result.current.settlementsPerDay !== null
-            ? `最新一笔资费差 ${formatPercent(result.current.spread)} · 约 ${formatRatio(result.current.settlementsPerDay)}`
-            : "当前同结算点数据不足，暂时无法估算日利息";
+          result.prediction.latestSpread !== null && result.prediction.settlementsPerDay !== null && result.prediction.cycleHours !== null
+            ? `最新一笔资费差 ${formatPercent(result.prediction.latestSpread)} · 约 ${formatRatio(result.prediction.settlementsPerDay)} · 约每 ${formatHours(result.prediction.cycleHours)} 结算一次`
+            : "当前同结算点数据不足，暂时无法推算预测日化";
+      }
+
+      function renderRecommendation(result) {
+        if (!result.recommendation) {
+          recommendationBox.innerHTML = "";
+          return;
+        }
+
+        recommendationBox.innerHTML = `
+          <div class="alert ${result.recommendation.tone}">
+            <div><strong>${result.recommendation.title}</strong></div>
+            <div>${result.recommendation.message}</div>
+          </div>
+        `;
+      }
+
+      function renderCurrentSnapshot(result) {
+        const snapshot8hValue = document.getElementById("snapshot-8h-spread-value");
+        const snapshotDailyValue = document.getElementById("snapshot-daily-spread-value");
+        const snapshotAnnualValue = document.getElementById("snapshot-annual-spread-value");
+
+        snapshot8hValue.textContent = formatPercent(result.currentSnapshot.comparable8hSpread);
+        snapshotDailyValue.textContent = formatPercentPerDay(result.currentSnapshot.comparableDailySpread);
+        snapshotAnnualValue.textContent = formatPercentPerYear(result.currentSnapshot.comparableAnnualizedSpread);
+
+        snapshot8hValue.className = toClassName(result.currentSnapshot.comparable8hSpread);
+        snapshotDailyValue.className = toClassName(result.currentSnapshot.comparableDailySpread);
+        snapshotAnnualValue.className = toClassName(result.currentSnapshot.comparableAnnualizedSpread);
+
+        const rows = [
+          { side: "多", data: result.currentSnapshot.long },
+          { side: "空", data: result.currentSnapshot.short },
+        ];
+        snapshotSideList.innerHTML = rows.map(({ side, data }) => `
+          <div class="snapshot-side-card ${side === "多" ? "long" : "short"}">
+            <div class="snapshot-side-head">
+              <span class="snapshot-side-badge ${side === "多" ? "long" : "short"}">${side}</span>
+              <div class="snapshot-side-labels">
+                <div class="snapshot-side-title">${side} · ${getExchangeLabel(data.exchange)}</div>
+                <div class="snapshot-side-meta">周期 ${formatCycle(data.cycleHours)} · 下次 ${data.nextFundingTime || "-"}</div>
+              </div>
+            </div>
+            <div class="snapshot-side-grid">
+              <div class="snapshot-side-item">
+                <small>当前费率</small>
+                <strong class="${toClassName(data.currentRate)}">${formatPercent(data.currentRate)}</strong>
+              </div>
+              <div class="snapshot-side-item">
+                <small>8H 归一</small>
+                <strong class="${toClassName(data.normalized8hRate)}">${formatPercent(data.normalized8hRate)}</strong>
+              </div>
+              <div class="snapshot-side-item">
+                <small>日化</small>
+                <strong class="${toClassName(data.dailyizedRate)}">${formatPercentPerDay(data.dailyizedRate)}</strong>
+              </div>
+              <div class="snapshot-side-item">
+                <small>年化</small>
+                <strong class="${toClassName(data.annualizedRate)}">${formatPercentPerYear(data.annualizedRate)}</strong>
+              </div>
+              <div class="snapshot-side-item">
+                <small>标记 / 指数偏离</small>
+                <strong class="${toClassName(data.basisPercent)}">${formatPercent(data.basisPercent)}</strong>
+              </div>
+            </div>
+          </div>
+        `).join("");
       }
 
       function renderDailyRows(result) {
@@ -955,7 +1598,7 @@
         document.getElementById("daily-short-header").textContent = `${getExchangeLabel(result.shortExchange)} 累计`;
 
         const body = document.getElementById("daily-table-body");
-        body.innerHTML = result.dailyRows.map((row) => `
+        body.innerHTML = [...result.dailyRows].reverse().map((row) => `
           <tr>
             <td>${row.date}</td>
             <td class="${toClassName(row.longRate)}">${formatPercent(row.longRate)}</td>
@@ -970,7 +1613,7 @@
         document.getElementById("settlement-short-header").textContent = `${getExchangeLabel(result.shortExchange)} %`;
 
         const body = document.getElementById("settlement-table-body");
-        body.innerHTML = result.settlementRows.map((row) => `
+        body.innerHTML = [...result.settlementRows].reverse().map((row) => `
           <tr>
             <td>${row.settlementTime}</td>
             <td class="${toClassName(row.longRate)}">${formatPercent(row.longRate)}</td>
@@ -982,6 +1625,8 @@
 
       function renderResult(result) {
         renderSummary(result);
+        renderCurrentSnapshot(result);
+        renderRecommendation(result);
         renderDailyRows(result);
         renderSettlementRows(result);
         setAlert(warningBox, "warn", result.warnings);
@@ -992,18 +1637,28 @@
         event.preventDefault();
         errorBox.innerHTML = "";
         warningBox.innerHTML = "";
+        recommendationBox.innerHTML = "";
         resultsEl.classList.remove("visible");
 
         runButton.disabled = true;
         runButton.textContent = "分析中...";
 
         try {
+          const lookbackDays = Number(lookbackDaysInput.value);
+          if (!Number.isFinite(lookbackDays) || lookbackDays <= 0) {
+            throw new Error("天数必须大于 0");
+          }
+
+          const endDate = new Date();
+          endDate.setSeconds(0, 0);
+          const startDate = new Date(endDate.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
+
           const result = await analyzeFundingRates({
             symbol: symbolInput.value.trim().toUpperCase(),
             longExchange: longExchangeSelect.value,
             shortExchange: shortExchangeSelect.value,
-            startDate: new Date(startTimeInput.value),
-            endDate: new Date(endTimeInput.value),
+            startDate,
+            endDate,
           });
           renderResult(result);
         } catch (error) {
@@ -1016,6 +1671,7 @@
 
       fillExchangeOptions();
       setDefaultFormValues();
+      swapExchangesButton.addEventListener("click", swapSelectedExchanges);
     </script>
   </body>
 </html>

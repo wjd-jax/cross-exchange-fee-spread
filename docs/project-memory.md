@@ -1,47 +1,58 @@
-# Project Memory
+# 项目记忆
 
-## Current Product Shape
+## 当前产品形态
 
-- Preferred entry is the pure local page: `index.html`
-- Flask version is still kept as a fallback when some exchange APIs do not behave well under `file://`
-- Core use case is comparing perpetual funding-rate spread across exchanges for a long/short hedge
+- 当前优先入口是纯本地页面：`index.html`
+- 不再继续维护 Flask 版本，后续界面改动只更新纯本地页面 `index.html`
+- 当前核心用途是比较不同交易所永续合约资金费率差，用于做多 / 做空对冲判断
 
-## Current UI Defaults
+## 当前界面默认值
 
-- Default symbol: `KAT`
-- Default long exchange: `bybit`
-- Default short exchange: `bn` (display name for Binance)
-- Form layout is tuned so long/short exchanges share one row and start/end time share one row on normal desktop widths
+- 默认币种：`KAT`
+- 默认做多交易所：`bybit`
+- 默认做空交易所：`bn`（页面展示名对应 Binance）
+- 查询区间改为输入“近几天”，不再手动选择开始和结束日期
+- 查询区增加“互换多空交易所”快速切换按钮
+- 每日汇总和结算明细都按倒序展示，最新数据在最上面
+- 首页顶部的说明卡片已隐藏，直接展示查询表单
+- 宽屏布局改为左右工作台：左侧是查询条件，右侧顶部是“分析结果 / 当前周期快照”并排主卡，下面是明细表
+- 结果区视觉风格偏紧凑：更小字号、更小卡片间距、更轻的面板层级，便于继续叠加功能
 
-## Current Calculation Rules
+## 当前计算规则
 
-- Spread is defined as `short funding rate - long funding rate`
-- Settlement spread is only calculated when both sides have data at the same settlement time
-- Missing data on one side is not treated as `0`
-- Long-side funding impact:
-  - positive funding rate -> pay funding
-  - negative funding rate -> receive funding
-- Short-side funding impact:
-  - positive funding rate -> receive funding
-  - negative funding rate -> pay funding
+- 利差定义为：`做空 funding rate - 做多 funding rate`
+- 只有两边在同一结算时间都有数据时，才计算该结算点利差
+- 单边缺失数据时，不按 `0` 补
+- 做多侧资费影响：
+  - 资金费率为正：付资费
+  - 资金费率为负：收资费
+- 做空侧资费影响：
+  - 资金费率为正：收资费
+  - 资金费率为负：付资费
 
-## Current Summary Cards
+## 当前汇总展示
 
-- Long total and short total show actual position impact rather than raw exchange rate sum
-- Tags use:
+- 做多累计和做空累计展示的是实际持仓影响，不是原始费率简单求和
+- 利差卡片展示所选区间的累计利差
+- 历史推算行展示“预测日化 + 年化”，依据是最新一笔可比较利差和估算的每日结算次数
+- 历史推算文案会显式展示从历史可比较结算时间中推断出的资费周期
+- 历史建议基于预测当日利差与历史日利差分布的对比结果给出
+- 页面单独保留“当前周期快照”区块，用于和类似站点的实时口径对齐；当前以右侧主卡方式展示，按各交易所当前资费周期归一到 `8H / 天 / 年`
+- 标签文案使用：
   - `收资费`
   - `付资费`
   - `持平`
-- Total spread card uses:
+- 总利差标签使用：
   - `盈利`
   - `亏损`
   - `持平`
-- Daily interest line estimates `%/天` from:
-  - the latest comparable spread
-  - estimated settlements per day from recent comparable timestamps
 
-## Current Repo Notes
+## 当前仓库说明
 
-- `index.html` is the main maintained surface right now
-- `templates/index.html` and `app.py` remain for the Flask path
-- `fees.py` and `src/funding_analysis.py` remain for script/server fallback usage
+- `index.html` 是唯一继续维护的前端入口
+- `templates/index.html` 与 `app.py` 暂不再跟随后续页面改动
+- `fees.py` 与 `src/funding_analysis.py` 继续承担脚本 / 计算逻辑
+
+## 协作约定
+
+- 用户说“晚安”或明确结束本轮时，先执行一次 GitHub 云端同步，再做收尾回复
