@@ -30,15 +30,15 @@
       }
 
       .page {
-        max-width: 1720px;
+        width: min(2240px, calc(100vw - 18px));
         margin: 0 auto;
-        padding: 20px 20px 40px;
+        padding: 14px 9px 30px;
       }
 
       .workspace {
         display: grid;
-        grid-template-columns: 340px minmax(0, 1fr);
-        gap: 18px;
+        grid-template-columns: 320px minmax(0, 1fr);
+        gap: 14px;
         align-items: start;
       }
 
@@ -57,7 +57,7 @@
       }
 
       .panel {
-        padding: 18px;
+        padding: 16px;
       }
 
       .entry-panel {
@@ -134,6 +134,12 @@
       .side-config {
         display: grid;
         grid-template-columns: minmax(0, 1fr) 88px;
+        gap: 8px;
+      }
+
+      .lookback-config {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 116px;
         gap: 8px;
       }
 
@@ -232,6 +238,158 @@
         border: 1px solid #cfe0f5;
       }
 
+      #error-box:empty,
+      #warning-box:empty {
+        display: none;
+      }
+
+      #error-box,
+      #warning-box {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 12px;
+      }
+
+      .title-with-alert {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .title-with-alert #warning-box {
+        margin-top: 0;
+      }
+
+      .alert-hover {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 800;
+        line-height: 1;
+        cursor: help;
+        border: 1px solid transparent;
+        box-shadow: 0 10px 22px rgba(31, 41, 55, 0.08);
+      }
+
+      .alert-hover:focus-visible {
+        outline: 2px solid rgba(19, 111, 99, 0.28);
+        outline-offset: 2px;
+      }
+
+      .alert-hover.warn {
+        background: #fff1f1;
+        color: #d14343;
+        border-color: rgba(209, 67, 67, 0.35);
+      }
+
+      .alert-hover.error {
+        background: #fff1f1;
+        color: #d14343;
+        border-color: #f0c6c6;
+      }
+
+      .alert-hover-count {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        min-width: 14px;
+        height: 14px;
+        padding: 0 3px;
+        border-radius: 999px;
+        background: #1f2937;
+        color: #fff;
+        font-size: 9px;
+        font-weight: 700;
+        line-height: 14px;
+        text-align: center;
+      }
+
+      .alert-hover-popover {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 10px);
+        width: min(420px, calc(100vw - 48px));
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(255, 253, 248, 0.98);
+        color: var(--ink);
+        border: 1px solid rgba(225, 216, 201, 0.96);
+        box-shadow: 0 18px 34px rgba(31, 41, 55, 0.14);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-4px);
+        transition: opacity 0.16s ease, transform 0.16s ease;
+        z-index: 12;
+        text-align: left;
+        user-select: text;
+      }
+
+      .alert-hover-popover::before {
+        content: "";
+        position: absolute;
+        top: -7px;
+        right: 10px;
+        width: 12px;
+        height: 12px;
+        background: rgba(255, 253, 248, 0.98);
+        border-left: 1px solid rgba(225, 216, 201, 0.96);
+        border-top: 1px solid rgba(225, 216, 201, 0.96);
+        transform: rotate(45deg);
+      }
+
+      .alert-hover:hover .alert-hover-popover,
+      .alert-hover:focus-within .alert-hover-popover {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+
+      .alert-hover-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .alert-copy-button {
+        width: auto;
+        min-height: 24px;
+        padding: 0 8px;
+        border-radius: 8px;
+        background: #d14343;
+        color: #fff;
+        box-shadow: none;
+        font-size: 11px;
+        line-height: 1;
+      }
+
+      .alert-copy-button:hover:not(:disabled) {
+        transform: none;
+        box-shadow: none;
+        background: #b83232;
+      }
+
+      .alert-hover-list {
+        display: grid;
+        gap: 6px;
+      }
+
+      .alert-hover-item {
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--ink);
+        word-break: break-word;
+      }
+
       .results {
         display: none;
         min-width: 0;
@@ -244,23 +402,29 @@
       }
 
       .results .panel {
-        padding: 16px 18px;
+        padding: 15px 16px;
         border-radius: 20px;
       }
 
       .overview-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1.18fr) minmax(360px, 0.82fr);
-        gap: 14px;
-        align-items: stretch;
+        grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+        gap: 12px;
+        align-items: start;
       }
 
       .summary-panel {
         min-width: 0;
+        align-self: start;
+      }
+
+      .summary-panel #warning-box:empty {
+        display: none;
       }
 
       .snapshot-panel {
         min-width: 0;
+        align-self: start;
       }
 
       .summary-grid {
@@ -335,7 +499,7 @@
 
       .summary-aux {
         display: grid;
-        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+        grid-template-columns: 1fr;
         gap: 10px;
         margin-top: 10px;
         align-items: stretch;
@@ -343,8 +507,357 @@
 
       .tables-grid {
         display: grid;
-        grid-template-columns: minmax(0, 0.84fr) minmax(0, 1.16fr);
+        grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+        gap: 12px;
+        align-items: start;
+      }
+
+      .table-panel {
+        display: block;
+        height: auto;
+        overflow: visible;
+      }
+
+      .table-panel-detail {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .table-scroll-wrap {
+        overflow: visible;
+        padding-right: 0;
+      }
+
+      .table-scroll-wrap.detail {
+        min-height: 0;
+        overflow: auto;
+        overscroll-behavior: contain;
+        padding-right: 2px;
+      }
+
+      .table-scroll-wrap table {
+        min-width: 100%;
+      }
+
+      .table-panel-detail th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #fffdfa;
+        box-shadow: inset 0 -1px 0 var(--line);
+      }
+
+      .trend-panel {
+        display: grid;
+        gap: 12px;
+      }
+
+      .trend-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.48fr) minmax(300px, 0.52fr);
         gap: 14px;
+        align-items: stretch;
+      }
+
+      .trend-main,
+      .trend-side {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .trend-main {
+        grid-template-rows: minmax(0, 1fr);
+        min-height: 0;
+        height: 100%;
+      }
+
+      .trend-note {
+        display: grid;
+        gap: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+        padding: 0 2px;
+      }
+
+      .trend-summary-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .trend-stat {
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #faf6ef;
+        border: 1px solid var(--line);
+        display: grid;
+        gap: 4px;
+      }
+
+      .trend-stat small {
+        color: var(--muted);
+        font-size: 10px;
+        letter-spacing: 0.04em;
+      }
+
+      .trend-stat strong {
+        font-size: 20px;
+        line-height: 1.1;
+      }
+
+      .trend-stat span {
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.45;
+      }
+
+      .trend-side #recommendation-box .alert {
+        margin: 0;
+        height: 100%;
+      }
+
+      .trend-chart-shell {
+        position: relative;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background:
+          radial-gradient(circle at top left, rgba(19, 111, 99, 0.08), transparent 36%),
+          linear-gradient(180deg, rgba(250, 246, 239, 0.95) 0%, rgba(255, 253, 248, 0.98) 100%);
+        padding: 10px;
+        cursor: grab;
+        align-self: stretch;
+        min-height: 0;
+        height: 100%;
+      }
+
+      .trend-chart-shell.dragging {
+        cursor: grabbing;
+      }
+
+      .trend-chart-shell.dragging,
+      .trend-chart-shell.dragging * {
+        user-select: none;
+      }
+
+      .trend-chart {
+        width: fit-content;
+        min-width: 100%;
+        min-height: 320px;
+      }
+
+      .trend-chart svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .trend-chart-empty {
+        min-height: 240px;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+        line-height: 1.6;
+      }
+
+      .chart-grid-line {
+        stroke: rgba(229, 221, 208, 0.95);
+        stroke-width: 1;
+      }
+
+      .chart-day-divider {
+        stroke: rgba(107, 114, 128, 0.22);
+        stroke-width: 1.2;
+        stroke-dasharray: 4 6;
+      }
+
+      .chart-zero-line {
+        stroke: rgba(19, 111, 99, 0.82);
+        stroke-width: 2.5;
+      }
+
+      .chart-hover-line {
+        stroke: rgba(31, 41, 55, 0.42);
+        stroke-width: 1.2;
+        stroke-dasharray: 3 4;
+        pointer-events: none;
+      }
+
+      .chart-axis-label {
+        fill: var(--muted);
+        font-size: 10px;
+      }
+
+      .chart-day-label {
+        fill: rgba(31, 41, 55, 0.72);
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      .chart-axis-label.zero {
+        fill: var(--accent);
+        font-weight: 700;
+      }
+
+      .chart-hit-area {
+        fill: transparent;
+      }
+
+      .chart-line {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .chart-settlement-line {
+        fill: none;
+        stroke: #b45309;
+        stroke-width: 2.2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 7 6;
+      }
+
+      .chart-point {
+        stroke: #fffdf8;
+        stroke-width: 2;
+      }
+
+      .chart-settlement-point {
+        stroke: #fffdf8;
+        stroke-width: 2.4;
+        filter: drop-shadow(0 2px 4px rgba(180, 83, 9, 0.2));
+      }
+
+      .chart-point-group {
+        cursor: default;
+      }
+
+      .chart-point.positive {
+        fill: var(--good);
+      }
+
+      .chart-point.negative {
+        fill: var(--bad);
+      }
+
+      .chart-point.neutral {
+        fill: var(--warn);
+      }
+
+      .chart-settlement-point.positive {
+        fill: var(--good);
+      }
+
+      .chart-settlement-point.negative {
+        fill: var(--bad);
+      }
+
+      .chart-settlement-point.neutral {
+        fill: #b45309;
+      }
+
+      .trend-head-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .trend-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .trend-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      .trend-zoom-status {
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(225, 216, 201, 0.95);
+        background: rgba(255, 253, 248, 0.96);
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .trend-head-actions select {
+        height: 34px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: #fffdfa;
+        color: var(--ink);
+        font-size: 12px;
+      }
+
+      .trend-tooltip {
+        position: fixed;
+        left: 0;
+        top: 0;
+        min-width: 220px;
+        max-width: min(280px, calc(100vw - 24px));
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(31, 41, 55, 0.96);
+        color: #fff;
+        box-shadow: 0 18px 32px rgba(31, 41, 55, 0.24);
+        pointer-events: none;
+        opacity: 0;
+        z-index: 1000;
+        transform: translate(-50%, calc(-100% - 12px));
+        transition: opacity 0.12s ease;
+      }
+
+      .trend-tooltip.visible {
+        opacity: 1;
+      }
+
+      .trend-tooltip strong {
+        display: block;
+        font-size: 12px;
+        line-height: 1.45;
+        margin-bottom: 8px;
+      }
+
+      .trend-tooltip-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .trend-tooltip-row + .trend-tooltip-row {
+        margin-top: 5px;
+      }
+
+      .trend-tooltip-row span {
+        color: rgba(255, 255, 255, 0.74);
+      }
+
+      .trend-tooltip-row b {
+        font-weight: 700;
       }
 
       #recommendation-box .alert,
@@ -501,17 +1014,22 @@
 
       .snapshot-side-list {
         display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: min-content;
         gap: 10px;
         margin-top: 12px;
+        align-items: start;
       }
 
       .snapshot-side-card {
         display: grid;
-        gap: 10px;
-        padding: 12px;
+        gap: 8px;
+        padding: 11px;
         border-radius: 14px;
         background: #fffdfa;
         border: 1px solid var(--line);
+        align-self: start;
+        height: fit-content;
       }
 
       .snapshot-side-card.long {
@@ -535,11 +1053,11 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-width: 38px;
-        height: 24px;
-        padding: 0 8px;
+        min-width: 34px;
+        height: 22px;
+        padding: 0 7px;
         border-radius: 999px;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
         border: 1px solid transparent;
       }
@@ -561,50 +1079,74 @@
       }
 
       .snapshot-side-title {
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
-        line-height: 1.3;
+        line-height: 1.25;
       }
 
       .snapshot-side-meta {
-        color: var(--muted);
-        font-size: 10px;
-        line-height: 1.4;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
         margin-top: 2px;
+      }
+
+      .snapshot-cycle-tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 18px;
+        padding: 0 6px;
+        border-radius: 999px;
+        background: rgba(19, 111, 99, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(19, 111, 99, 0.16);
+        font-size: 9px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .snapshot-next-time {
+        color: var(--muted);
+        font-size: 9px;
+        line-height: 1.35;
       }
 
       .snapshot-side-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px 10px;
+        gap: 6px 8px;
+        align-items: start;
       }
 
       .snapshot-side-item {
         min-width: 0;
         display: grid;
-        gap: 3px;
-      }
-
-      .snapshot-side-item.full {
-        grid-column: 1 / -1;
+        gap: 2px;
+        align-content: start;
       }
 
       .snapshot-side-item small {
         display: block;
         color: var(--muted);
-        font-size: 10px;
-        line-height: 1.3;
-        margin-bottom: 2px;
+        font-size: 9px;
+        line-height: 1.25;
+        margin-bottom: 1px;
       }
 
       .snapshot-side-item strong {
         display: block;
-        font-size: 12px;
-        line-height: 1.25;
+        font-size: 11px;
+        line-height: 1.2;
       }
 
       @media (max-width: 1480px) {
-        .overview-grid {
+        .trend-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .overview-grid,
+        .tables-grid {
           grid-template-columns: 1fr;
         }
       }
@@ -618,8 +1160,7 @@
           position: static;
         }
 
-        .entry-panel .form-grid,
-        .tables-grid {
+        .entry-panel .form-grid {
           grid-template-columns: 1fr;
         }
       }
@@ -633,6 +1174,15 @@
           grid-template-columns: 1fr;
         }
 
+        .trend-head-actions {
+          width: 100%;
+          justify-content: space-between;
+        }
+
+        .trend-controls {
+          justify-content: flex-end;
+        }
+
         .snapshot-metric-list {
           grid-template-columns: 1fr;
         }
@@ -643,6 +1193,12 @@
 
         .summary-line {
           gap: 8px;
+        }
+      }
+
+      @media (max-width: 1180px) {
+        .snapshot-side-list {
+          grid-template-columns: 1fr;
         }
       }
 
@@ -696,11 +1252,14 @@
               </div>
               <div class="field full">
                 <label for="lookback_days">近几天</label>
-                <input id="lookback_days" type="number" name="lookback_days" min="1" step="1" placeholder="例如 10">
+                <div class="lookback-config">
+                  <input id="lookback_days" type="number" name="lookback_days" min="1" step="1" placeholder="例如 10" aria-label="自定义回看天数">
+                  <select id="lookback_preset" name="lookback_preset" aria-label="快速选择回看范围"></select>
+                </div>
               </div>
             </div>
             <div class="actions">
-              <div class="hint">结束时间默认取当前时刻，支持一键互换多空交易所，默认两边都按合约口径计算。</div>
+              <div class="hint">结束时间默认取当前时刻，近几天可手输或用快速选择；默认两边都按合约口径计算。</div>
               <button id="run-button" type="submit">开始分析</button>
             </div>
           </form>
@@ -710,10 +1269,42 @@
         </aside>
 
       <div id="results" class="results">
+        <section class="panel trend-panel">
+          <div class="section-head">
+            <h2>利差走势</h2>
+            <div class="trend-head-actions">
+              <span id="trend-granularity-meta">按 1D 汇总，最新时间在右侧</span>
+              <div class="trend-controls">
+                <label class="trend-control">
+                  <span>颗粒度</span>
+                  <select id="trend-granularity" aria-label="走势图颗粒度"></select>
+                </label>
+                <span id="trend-zoom-status" class="trend-control trend-zoom-status">滚轮缩放 1x</span>
+                <select id="trend-zoom" aria-label="走势图横轴缩放" hidden></select>
+              </div>
+            </div>
+          </div>
+          <div class="trend-layout">
+            <div class="trend-main">
+              <div class="trend-chart-shell">
+                <div id="trend-chart" class="trend-chart"></div>
+                <div id="trend-tooltip" class="trend-tooltip" aria-hidden="true"></div>
+              </div>
+            </div>
+            <div class="trend-side">
+              <div id="trend-summary" class="trend-summary-grid"></div>
+              <div id="recommendation-box"></div>
+            </div>
+          </div>
+        </section>
+
         <div class="overview-grid">
           <section class="panel summary-panel">
             <div class="section-head">
-              <h2 id="result-title">分析结果</h2>
+              <div class="title-with-alert">
+                <h2 id="result-title">分析结果</h2>
+                <div id="warning-box"></div>
+              </div>
               <span id="result-meta"></span>
             </div>
             <div class="summary-grid">
@@ -747,9 +1338,7 @@
                 </div>
                 <strong id="summary-daily-interest-value"></strong>
               </div>
-              <div id="recommendation-box"></div>
             </div>
-            <div id="warning-box"></div>
           </section>
 
           <section class="panel snapshot-panel">
@@ -776,12 +1365,12 @@
         </div>
 
         <div class="tables-grid">
-          <section class="panel">
+          <section id="daily-summary-panel" class="panel table-panel table-panel-summary">
             <div class="section-head">
               <h2>每日汇总统计</h2>
-              <span>00:00 结算默认归到前一天</span>
+              <span id="daily-summary-meta">默认展示近 14 天；00:00 结算归到前一天</span>
             </div>
-            <div style="overflow:auto;">
+            <div class="table-scroll-wrap">
               <table>
                 <thead>
                   <tr>
@@ -796,12 +1385,12 @@
             </div>
           </section>
 
-          <section class="panel">
+          <section id="settlement-detail-panel" class="panel table-panel table-panel-detail">
             <div class="section-head">
               <h2>详细结算明细</h2>
               <span>按任一边结算时点计算；另一边该时刻无结算则按 0 计入</span>
             </div>
-            <div style="overflow:auto;">
+            <div id="settlement-scroll-wrap" class="table-scroll-wrap detail">
               <table>
                 <thead>
                   <tr>
@@ -832,6 +1421,34 @@
         { value: "futures", label: "合约" },
         { value: "spot", label: "现货" },
       ];
+      const LOOKBACK_PRESET_OPTIONS = [
+        { value: "custom", label: "自定义" },
+        { value: "1", label: "24 小时" },
+        { value: "3", label: "3 天" },
+        { value: "7", label: "7 天" },
+        { value: "14", label: "14 天" },
+      ];
+      const TREND_GRANULARITY_OPTIONS = [
+        { value: "1h", label: "1H" },
+        { value: "2h", label: "2H" },
+        { value: "4h", label: "4H" },
+        { value: "8h", label: "8H" },
+        { value: "1d", label: "1D" },
+      ];
+      const TREND_ZOOM_OPTIONS = [
+        { value: "1", label: "1x" },
+        { value: "1.25", label: "1.25x" },
+        { value: "1.5", label: "1.5x" },
+        { value: "1.75", label: "1.75x" },
+        { value: "2", label: "2x" },
+        { value: "2.5", label: "2.5x" },
+        { value: "3", label: "3x" },
+        { value: "4", label: "4x" },
+      ];
+      const FORM_STATE_STORAGE_KEY = "cross-exchange-fee-spread:ui-state";
+      const FORM_STATE_VERSION = 2;
+      const DEFAULT_LOOKBACK_DAYS = "14";
+      const DAY_MS = 24 * 60 * 60 * 1000;
       const BINANCE_FUTURES_BASES = [
         "https://fapi.binance.com",
         "https://fapi1.binance.com",
@@ -842,6 +1459,7 @@
         "https://api.bybit.com",
         "https://api.bytick.com",
       ];
+      const IS_FILE_PROTOCOL = window.location.protocol === "file:";
 
       const form = document.getElementById("analysis-form");
       const symbolInput = document.getElementById("symbol");
@@ -850,6 +1468,7 @@
       const longMarketTypeSelect = document.getElementById("long_market_type");
       const shortMarketTypeSelect = document.getElementById("short_market_type");
       const lookbackDaysInput = document.getElementById("lookback_days");
+      const lookbackPresetSelect = document.getElementById("lookback_preset");
       const swapExchangesButton = document.getElementById("swap-exchanges");
       const runButton = document.getElementById("run-button");
       const resultsEl = document.getElementById("results");
@@ -857,6 +1476,21 @@
       const warningBox = document.getElementById("warning-box");
       const recommendationBox = document.getElementById("recommendation-box");
       const snapshotSideList = document.getElementById("snapshot-side-list");
+      const dailySummaryMeta = document.getElementById("daily-summary-meta");
+      const dailySummaryPanel = document.getElementById("daily-summary-panel");
+      const settlementDetailPanel = document.getElementById("settlement-detail-panel");
+      const settlementScrollWrap = document.getElementById("settlement-scroll-wrap");
+      const trendSummary = document.getElementById("trend-summary");
+      const trendChart = document.getElementById("trend-chart");
+      const trendTooltip = document.getElementById("trend-tooltip");
+      const trendGranularitySelect = document.getElementById("trend-granularity");
+      const trendZoomSelect = document.getElementById("trend-zoom");
+      const trendZoomStatus = document.getElementById("trend-zoom-status");
+      const trendGranularityMeta = document.getElementById("trend-granularity-meta");
+      let latestAnalysisResult = null;
+      let latestFetchedAnalysisResult = null;
+      let latestFetchedLookbackDays = 0;
+      let tablePanelSyncFrame = 0;
 
       function pad(value) {
         return String(value).padStart(2, "0");
@@ -956,6 +1590,321 @@
         return `${value.toFixed(2)}H`;
       }
 
+      function formatShortDateLabel(value) {
+        if (!value || typeof value !== "string") return "-";
+        const parts = value.split("-");
+        if (parts.length !== 3) return value;
+        return `${parts[1]}-${parts[2]}`;
+      }
+
+      function getTrendGranularityLabel(granularity) {
+        const match = TREND_GRANULARITY_OPTIONS.find((option) => option.value === granularity);
+        return match ? match.label : granularity;
+      }
+
+      function getTrendBucketHours(granularity) {
+        if (granularity === "1d") return 24;
+        return Number(granularity.replace("h", ""));
+      }
+
+      function getHourBucketStart(timeMs, bucketHours) {
+        const date = new Date(timeMs);
+        date.setMinutes(0, 0, 0);
+        date.setHours(date.getHours() - (date.getHours() % bucketHours));
+        return date;
+      }
+
+      function parseLocalDate(dateText) {
+        const [year, month, day] = String(dateText).split("-").map(Number);
+        return new Date(year, (month || 1) - 1, day || 1, 0, 0, 0, 0);
+      }
+
+      function formatTrendAxisLabel(date, granularity) {
+        if (granularity === "1d") return formatShortDateLabel(formatDateDisplay(date));
+        return `${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:00`;
+      }
+
+      function formatTrendBucketRange(startDate, granularity) {
+        if (granularity === "1d") {
+          return formatDateDisplay(startDate);
+        }
+        return formatDateTimeDisplay(startDate);
+      }
+
+      function annualizeTrendSpread(spread, granularity) {
+        if (spread === null || spread === undefined || !Number.isFinite(spread)) return null;
+        const bucketHours = getTrendBucketHours(granularity);
+        return spread * (24 / bucketHours) * 365;
+      }
+
+      function getTrendZoomFactor() {
+        const zoomFactor = Number(trendZoomSelect.value || "1");
+        return Number.isFinite(zoomFactor) && zoomFactor > 0 ? zoomFactor : 1;
+      }
+
+      function syncTrendZoomStatus() {
+        const zoomFactor = getTrendZoomFactor();
+        trendZoomStatus.textContent = `滚轮缩放 ${zoomFactor}x`;
+      }
+
+      function getTrendDayKey(timeMs) {
+        const date = new Date(timeMs);
+        if (date.getHours() === 0 && date.getMinutes() === 0) {
+          date.setDate(date.getDate() - 1);
+        }
+        return formatDateDisplay(date);
+      }
+
+      function getSettlementStatusLabel(row) {
+        if (!row) return "未发生结算";
+
+        if (row.seriesKind === "settlement") {
+          const sides = [];
+          if (row.longSettled) sides.push("做多");
+          if (row.shortSettled) sides.push("做空");
+          return sides.length > 0 ? `发生结算：${sides.join("、")}` : "未发生结算";
+        }
+
+        const settlementCount = Number(row.settlementCount || 0);
+        if (settlementCount <= 0) return "未发生结算";
+        const longCount = Number(row.longSettlementCount || 0);
+        const shortCount = Number(row.shortSettlementCount || 0);
+        return `发生 ${settlementCount} 次结算 · 多 ${longCount} / 空 ${shortCount}`;
+      }
+
+      function buildActualSettlementTrendRows(result) {
+        return result.settlementRows
+          .filter((row) => row.spread !== null && Number.isFinite(row.spread) && (row.longSettled || row.shortSettled))
+          .map((row) => ({
+            timeMs: row.timeMs,
+            detailLabel: row.settlementTime,
+            axisLabel: formatTrendAxisLabel(new Date(row.timeMs), "1h"),
+            longRate: row.longRate,
+            shortRate: row.shortRate,
+            spread: row.spread,
+            longSettled: Boolean(row.longSettled),
+            shortSettled: Boolean(row.shortSettled),
+            settlementCount: Number(row.settlementCount || 0),
+            longSettlementCount: row.longSettled ? 1 : 0,
+            shortSettlementCount: row.shortSettled ? 1 : 0,
+            seriesKind: "settlement",
+          }))
+          .sort((a, b) => a.timeMs - b.timeMs);
+      }
+
+      function buildTrendRows(result, granularity) {
+        const actualSettlementRows = buildActualSettlementTrendRows(result);
+
+        if (granularity === "1d") {
+          const settlementStatsByDay = new Map();
+          for (const settlementRow of actualSettlementRows) {
+            const dayKey = getTrendDayKey(settlementRow.timeMs);
+            if (!settlementStatsByDay.has(dayKey)) {
+              settlementStatsByDay.set(dayKey, { settlementCount: 0, longSettlementCount: 0, shortSettlementCount: 0 });
+            }
+            const stats = settlementStatsByDay.get(dayKey);
+            stats.settlementCount += 1;
+            stats.longSettlementCount += settlementRow.longSettled ? 1 : 0;
+            stats.shortSettlementCount += settlementRow.shortSettled ? 1 : 0;
+          }
+
+          return result.dailyRows
+            .filter((row) => row.spread !== null && Number.isFinite(row.spread))
+            .map((row) => {
+              const bucketDate = parseLocalDate(row.date);
+              const settlementStats = settlementStatsByDay.get(row.date) || { settlementCount: 0, longSettlementCount: 0, shortSettlementCount: 0 };
+              return {
+                timeMs: bucketDate.getTime(),
+                detailLabel: formatTrendBucketRange(bucketDate, granularity),
+                axisLabel: formatTrendAxisLabel(bucketDate, granularity),
+                longRate: row.longRate,
+                shortRate: row.shortRate,
+                spread: row.spread,
+                settlementCount: settlementStats.settlementCount,
+                longSettlementCount: settlementStats.longSettlementCount,
+                shortSettlementCount: settlementStats.shortSettlementCount,
+                seriesKind: "aggregate",
+              };
+            });
+        }
+
+        const bucketHours = getTrendBucketHours(granularity);
+        const buckets = new Map();
+
+        for (const row of result.settlementRows) {
+          if (row.spread === null || !Number.isFinite(row.spread)) continue;
+          const bucketDate = getHourBucketStart(row.timeMs, bucketHours);
+          const key = bucketDate.getTime();
+          if (!buckets.has(key)) {
+            buckets.set(key, {
+              timeMs: key,
+              detailLabel: formatTrendBucketRange(bucketDate, granularity),
+              axisLabel: formatTrendAxisLabel(bucketDate, granularity),
+              longRate: 0,
+              shortRate: 0,
+              spread: 0,
+              settlementCount: 0,
+              longSettlementCount: 0,
+              shortSettlementCount: 0,
+              seriesKind: "aggregate",
+            });
+          }
+          const bucket = buckets.get(key);
+          bucket.longRate += row.longRate ?? 0;
+          bucket.shortRate += row.shortRate ?? 0;
+          bucket.spread += row.spread ?? 0;
+          bucket.settlementCount += (row.longSettled || row.shortSettled) ? 1 : 0;
+          bucket.longSettlementCount += row.longSettled ? 1 : 0;
+          bucket.shortSettlementCount += row.shortSettled ? 1 : 0;
+        }
+
+        return Array.from(buckets.values()).sort((a, b) => a.timeMs - b.timeMs);
+      }
+
+      function buildTrendTooltipText(row, result) {
+        const longLabel = formatExchangeWithMarket(result.longExchange, result.longMarketType);
+        const shortLabel = formatExchangeWithMarket(result.shortExchange, result.shortMarketType);
+        const seriesLabel =
+          row.seriesKind === "settlement"
+            ? "实际结算点"
+            : "汇总趋势点";
+        return [
+          `${seriesLabel} · ${row.detailLabel}`,
+          `做多 ${longLabel}: ${formatPercent(row.longRate)}`,
+          `做空 ${shortLabel}: ${formatPercent(row.shortRate)}`,
+          `利差 (S-L): ${formatPercent(row.spread)}`,
+          getSettlementStatusLabel(row),
+        ].join("\n");
+      }
+
+      function showTrendTooltip(event, row, result, anchor = null) {
+        const longLabel = formatExchangeWithMarket(result.longExchange, result.longMarketType);
+        const shortLabel = formatExchangeWithMarket(result.shortExchange, result.shortMarketType);
+        const seriesLabel =
+          row.seriesKind === "settlement"
+            ? "实际结算点"
+            : "汇总趋势点";
+
+        trendTooltip.innerHTML = `
+          <strong>${seriesLabel} · ${row.detailLabel}</strong>
+          <div class="trend-tooltip-row">
+            <span>做多 · ${longLabel}</span>
+            <b class="${toClassName(row.longRate)}">${formatPercent(row.longRate)}</b>
+          </div>
+          <div class="trend-tooltip-row">
+            <span>做空 · ${shortLabel}</span>
+            <b class="${toClassName(row.shortRate)}">${formatPercent(row.shortRate)}</b>
+          </div>
+          <div class="trend-tooltip-row">
+            <span>利差 (S-L)</span>
+            <b class="${toClassName(row.spread)}">${formatPercent(row.spread)}</b>
+          </div>
+          <div class="trend-tooltip-row">
+            <span>结算状态</span>
+            <b>${getSettlementStatusLabel(row)}</b>
+          </div>
+        `;
+
+        trendTooltip.classList.add("visible");
+        trendTooltip.setAttribute("aria-hidden", "false");
+
+        const tooltipWidth = trendTooltip.offsetWidth || 240;
+        const tooltipHeight = trendTooltip.offsetHeight || 110;
+        const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+        const anchorClientX = anchor && Number.isFinite(anchor.clientX) ? anchor.clientX : event.clientX;
+        const anchorClientY = anchor && Number.isFinite(anchor.clientY) ? anchor.clientY : event.clientY;
+        const rawLeft = anchorClientX >= 0 && anchorClientX <= viewportWidth ? anchorClientX : event.clientX;
+        const rawTop = anchorClientY >= 0 && anchorClientY <= viewportHeight ? anchorClientY : event.clientY;
+        const leftMin = (tooltipWidth / 2) + 12;
+        const leftMax = Math.max(leftMin, viewportWidth - (tooltipWidth / 2) - 12);
+        const topMin = tooltipHeight + 18;
+        const topMax = Math.max(topMin, viewportHeight - 16);
+        const left = Math.max(leftMin, Math.min(rawLeft, leftMax));
+        const top = Math.max(topMin, Math.min(rawTop, topMax));
+
+        trendTooltip.style.left = `${left}px`;
+        trendTooltip.style.top = `${top}px`;
+      }
+
+      function hideTrendTooltip() {
+        trendTooltip.classList.remove("visible");
+        trendTooltip.setAttribute("aria-hidden", "true");
+        const hoverLine = trendChart.querySelector("[data-hover-line]");
+        if (hoverLine) {
+          hoverLine.style.display = "none";
+        }
+      }
+
+      function syncTablePanelHeights() {
+        if (!dailySummaryPanel || !settlementDetailPanel || !settlementScrollWrap) return;
+
+        settlementDetailPanel.style.height = "auto";
+        settlementScrollWrap.style.maxHeight = "none";
+
+        if (window.innerWidth <= 1480) return;
+
+        const summaryHeight = dailySummaryPanel.offsetHeight;
+        if (!summaryHeight) return;
+
+        settlementDetailPanel.style.height = `${summaryHeight}px`;
+      }
+
+      function scheduleTablePanelSync() {
+        if (tablePanelSyncFrame) {
+          cancelAnimationFrame(tablePanelSyncFrame);
+        }
+        tablePanelSyncFrame = requestAnimationFrame(() => {
+          tablePanelSyncFrame = 0;
+          syncTablePanelHeights();
+        });
+      }
+
+      function stepTrendZoom(direction, anchorClientX = null) {
+        const zoomLevels = TREND_ZOOM_OPTIONS.map((option) => Number(option.value)).filter((value) => Number.isFinite(value));
+        const currentZoom = getTrendZoomFactor();
+        const currentIndex = Math.max(0, zoomLevels.findIndex((value) => Math.abs(value - currentZoom) < 1e-8));
+        const nextIndex = Math.max(0, Math.min(zoomLevels.length - 1, currentIndex + direction));
+
+        if (nextIndex === currentIndex) return false;
+
+        const trendChartShell = trendChart.parentElement;
+        const anchorX = anchorClientX === null || !trendChartShell
+          ? 0
+          : anchorClientX - trendChartShell.getBoundingClientRect().left;
+        const previousScrollWidth = trendChartShell ? trendChartShell.scrollWidth : 0;
+        const previousScrollLeft = trendChartShell ? trendChartShell.scrollLeft : 0;
+        const previousAnchorRatio =
+          trendChartShell && previousScrollWidth > 0
+            ? (previousScrollLeft + anchorX) / previousScrollWidth
+            : 0;
+
+        trendZoomSelect.value = String(zoomLevels[nextIndex]);
+        syncTrendZoomStatus();
+        saveFormState();
+
+        if (latestAnalysisResult) {
+          renderTrendChart(latestAnalysisResult);
+          if (trendChartShell) {
+            requestAnimationFrame(() => {
+              const nextScrollWidth = trendChartShell.scrollWidth;
+              trendChartShell.scrollLeft = Math.max(0, previousAnchorRatio * nextScrollWidth - anchorX);
+            });
+          }
+        }
+
+        return true;
+      }
+
+      function panTrendHorizontally(delta) {
+        const trendChartShell = trendChart.parentElement;
+        if (!trendChartShell || !delta) return false;
+        const nextScrollLeft = trendChartShell.scrollLeft + delta;
+        if (Math.abs(nextScrollLeft - trendChartShell.scrollLeft) < 0.5) return false;
+        trendChartShell.scrollLeft = nextScrollLeft;
+        return true;
+      }
+
       function formatFetchErrorMessage(error) {
         const message = error?.message || String(error);
         if (message === "Failed to fetch") {
@@ -965,6 +1914,42 @@
           return "请求超时（目标交易所响应过慢，已自动切换或跳过）";
         }
         return message;
+      }
+
+      function isFailedToFetchError(error) {
+        return (error?.message || String(error)) === "Failed to fetch";
+      }
+
+      function pushUniqueWarning(warnings, message) {
+        if (!message) return;
+        if (!warnings.includes(message)) {
+          warnings.push(message);
+        }
+      }
+
+      function buildBrowserRestrictedWarning(exchange) {
+        if (IS_FILE_PROTOCOL) {
+          return `${exchange} 直连受限：当前是 file:// 单文件页面，该接口会被浏览器或交易所跨域策略拦截。若必须查询 ${exchange}，需要使用带代理的本地服务版；否则可先切换其它交易所。`;
+        }
+        return `${exchange} 直连受限：当前浏览器环境无法直接访问该接口，建议切换其它交易所或使用带代理的本地服务版。`;
+      }
+
+      function isOkxMissingInstrumentMessage(message) {
+        if (!message || typeof message !== "string") return false;
+        return message.includes("不存在") || /Instrument ID/i.test(message);
+      }
+
+      function buildOkxUnsupportedSwapWarning(symbol, candidates) {
+        return `OKX 当前没有 ${symbol} 对应的永续合约（已尝试 ${candidates.join(" / ")}）`;
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
       }
 
       function percentile(values, quantile) {
@@ -978,12 +1963,63 @@
         return sorted[lower] + (sorted[upper] - sorted[lower]) * weight;
       }
 
+      async function copyAlertMessages(button) {
+        const host = button.closest(".alert-hover");
+        const text = host ? host.dataset.alertText || "" : "";
+        if (!text) return;
+
+        const originalText = button.textContent;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+          } else {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            textarea.remove();
+          }
+          button.textContent = "已复制";
+        } catch (_error) {
+          button.textContent = "复制失败";
+        } finally {
+          window.setTimeout(() => {
+            button.textContent = originalText;
+          }, 1200);
+        }
+      }
+
       function setAlert(container, type, messages) {
         if (!messages || messages.length === 0) {
           container.innerHTML = "";
           return;
         }
-        container.innerHTML = `<div class="alert ${type}">${messages.map((message) => `<div>${message}</div>`).join("")}</div>`;
+        if (type === "warn" || type === "error") {
+          const label = type === "error" ? "查询错误" : "接口提示";
+          const copyText = messages.join("\n");
+          const safeMessages = messages
+            .map((message) => `<div class="alert-hover-item">${escapeHtml(message)}</div>`)
+            .join("");
+          container.innerHTML = `
+            <div class="alert-hover ${type}" tabindex="0" aria-label="${label}，共 ${messages.length} 条" data-alert-text="${escapeHtml(copyText)}">
+              <span aria-hidden="true">!</span>
+              <span class="alert-hover-count">${messages.length}</span>
+              <div class="alert-hover-popover" role="tooltip">
+                <div class="alert-hover-title">
+                  <span>${label} · ${messages.length} 条</span>
+                  <button class="alert-copy-button" type="button" onclick="copyAlertMessages(this)">复制</button>
+                </div>
+                <div class="alert-hover-list">${safeMessages}</div>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        container.innerHTML = `<div class="alert ${type}">${messages.map((message) => `<div>${escapeHtml(message)}</div>`).join("")}</div>`;
       }
 
       function fillExchangeOptions() {
@@ -999,13 +2035,175 @@
         shortMarketTypeSelect.innerHTML = marketTypeOptions;
       }
 
+      function fillLookbackPresetOptions() {
+        lookbackPresetSelect.innerHTML = LOOKBACK_PRESET_OPTIONS
+          .map((option) => `<option value="${option.value}">${option.label}</option>`)
+          .join("");
+      }
+
+      function fillTrendGranularityOptions() {
+        trendGranularitySelect.innerHTML = TREND_GRANULARITY_OPTIONS
+          .map((option) => `<option value="${option.value}">${option.label}</option>`)
+          .join("");
+        trendGranularitySelect.value = "1d";
+      }
+
+      function fillTrendZoomOptions() {
+        trendZoomSelect.innerHTML = TREND_ZOOM_OPTIONS
+          .map((option) => `<option value="${option.value}">${option.label}</option>`)
+          .join("");
+        trendZoomSelect.value = "1";
+        syncTrendZoomStatus();
+      }
+
+      function getLookbackPresetValue(value) {
+        const days = Number(String(value || "").trim());
+        const preset = LOOKBACK_PRESET_OPTIONS.find((option) => (
+          option.value !== "custom" && Number(option.value) === days
+        ));
+        return preset ? preset.value : "custom";
+      }
+
+      function syncLookbackPresetFromInput() {
+        lookbackPresetSelect.value = getLookbackPresetValue(lookbackDaysInput.value);
+      }
+
+      function formatLookbackLabel(days) {
+        if (Number(days) === 1) return "24 小时";
+        return `${Number(days).toFixed(Number.isInteger(Number(days)) ? 0 : 1)} 天`;
+      }
+
+      function readLookbackDays() {
+        const lookbackDays = Number(lookbackDaysInput.value);
+        if (!Number.isFinite(lookbackDays) || lookbackDays <= 0) {
+          throw new Error("天数必须大于 0");
+        }
+        return lookbackDays;
+      }
+
+      function applyLookbackPreset() {
+        const shouldApplyPreset = lookbackPresetSelect.value !== "custom";
+        if (shouldApplyPreset) {
+          lookbackDaysInput.value = lookbackPresetSelect.value;
+        }
+        saveFormState();
+        if (shouldApplyPreset) {
+          renderSelectedLookbackFromCache();
+        }
+      }
+
+      function handleLookbackDaysCommitted() {
+        syncLookbackPresetFromInput();
+        saveFormState();
+        renderSelectedLookbackFromCache();
+      }
+
       function setDefaultFormValues() {
         symbolInput.value = "KAT";
         longExchangeSelect.value = "bybit";
         shortExchangeSelect.value = "binance";
         longMarketTypeSelect.value = "futures";
         shortMarketTypeSelect.value = "futures";
-        lookbackDaysInput.value = "10";
+        lookbackDaysInput.value = DEFAULT_LOOKBACK_DAYS;
+        trendGranularitySelect.value = "1d";
+        trendZoomSelect.value = "1";
+        syncLookbackPresetFromInput();
+      }
+
+      function getCachedDefaultState() {
+        return {
+          version: FORM_STATE_VERSION,
+          symbol: "KAT",
+          longExchange: "bybit",
+          shortExchange: "binance",
+          longMarketType: "futures",
+          shortMarketType: "futures",
+          lookbackDays: DEFAULT_LOOKBACK_DAYS,
+          trendGranularity: "1d",
+          trendZoom: "1",
+        };
+      }
+
+      function getCurrentFormState() {
+        return {
+          version: FORM_STATE_VERSION,
+          symbol: symbolInput.value.trim().toUpperCase(),
+          longExchange: longExchangeSelect.value,
+          shortExchange: shortExchangeSelect.value,
+          longMarketType: longMarketTypeSelect.value,
+          shortMarketType: shortMarketTypeSelect.value,
+          lookbackDays: String(lookbackDaysInput.value || "").trim(),
+          trendGranularity: trendGranularitySelect.value || "1d",
+          trendZoom: trendZoomSelect.value || "1",
+        };
+      }
+
+      function normalizeCachedFormState(rawState) {
+        const defaults = getCachedDefaultState();
+        const state = rawState && typeof rawState === "object" ? rawState : {};
+        const exchangeValues = new Set(EXCHANGE_OPTIONS.map((option) => option.value));
+        const marketTypeValues = new Set(MARKET_TYPE_OPTIONS.map((option) => option.value));
+        const granularityValues = new Set(TREND_GRANULARITY_OPTIONS.map((option) => option.value));
+        const zoomValues = new Set(TREND_ZOOM_OPTIONS.map((option) => option.value));
+        const isLegacyState = Number(state.version) !== FORM_STATE_VERSION;
+        const rawLookbackValue = String(state.lookbackDays ?? "").trim();
+        const lookbackValue = isLegacyState && rawLookbackValue === "10"
+          ? defaults.lookbackDays
+          : rawLookbackValue;
+        const parsedLookbackValue = Number(lookbackValue);
+
+        return {
+          version: FORM_STATE_VERSION,
+          symbol: typeof state.symbol === "string" && state.symbol.trim()
+            ? state.symbol.trim().toUpperCase()
+            : defaults.symbol,
+          longExchange: exchangeValues.has(state.longExchange) ? state.longExchange : defaults.longExchange,
+          shortExchange: exchangeValues.has(state.shortExchange) ? state.shortExchange : defaults.shortExchange,
+          longMarketType: marketTypeValues.has(state.longMarketType) ? state.longMarketType : defaults.longMarketType,
+          shortMarketType: marketTypeValues.has(state.shortMarketType) ? state.shortMarketType : defaults.shortMarketType,
+          lookbackDays:
+            Number.isFinite(parsedLookbackValue) && parsedLookbackValue > 0
+              ? lookbackValue
+              : defaults.lookbackDays,
+          trendGranularity: granularityValues.has(state.trendGranularity) ? state.trendGranularity : defaults.trendGranularity,
+          trendZoom: zoomValues.has(state.trendZoom) ? state.trendZoom : defaults.trendZoom,
+        };
+      }
+
+      function applyFormState(state) {
+        const normalizedState = normalizeCachedFormState(state);
+        symbolInput.value = normalizedState.symbol;
+        longExchangeSelect.value = normalizedState.longExchange;
+        shortExchangeSelect.value = normalizedState.shortExchange;
+        longMarketTypeSelect.value = normalizedState.longMarketType;
+        shortMarketTypeSelect.value = normalizedState.shortMarketType;
+        lookbackDaysInput.value = normalizedState.lookbackDays;
+        syncLookbackPresetFromInput();
+        trendGranularitySelect.value = normalizedState.trendGranularity;
+        trendZoomSelect.value = normalizedState.trendZoom;
+        syncTrendZoomStatus();
+      }
+
+      function saveFormState() {
+        try {
+          window.localStorage.setItem(FORM_STATE_STORAGE_KEY, JSON.stringify(getCurrentFormState()));
+        } catch (_error) {
+        }
+      }
+
+      function restoreFormState() {
+        try {
+          const cached = window.localStorage.getItem(FORM_STATE_STORAGE_KEY);
+          if (!cached) {
+            setDefaultFormValues();
+            saveFormState();
+            return;
+          }
+          applyFormState(JSON.parse(cached));
+          saveFormState();
+        } catch (_error) {
+          setDefaultFormValues();
+        }
       }
 
       function swapSelectedExchanges() {
@@ -1015,6 +2213,7 @@
         shortExchangeSelect.value = currentLong;
         longMarketTypeSelect.value = shortMarketTypeSelect.value;
         shortMarketTypeSelect.value = currentLongMarketType;
+        saveFormState();
       }
 
       async function fetchJson(url, params) {
@@ -1064,14 +2263,20 @@
             endTime: String(endDate.getTime() + 2000),
             limit: "1000",
           });
-          if (Array.isArray(data)) {
-            for (const item of data) {
-              const date = normalizeSettlementTime(new Date(Number(item.fundingTime)));
-              rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
-            }
+          if (!Array.isArray(data)) {
+            pushUniqueWarning(warnings, `Binance 未返回 ${symbol}USDT 合约资金费数据：${data?.msg || "返回结果不可用"}`);
+            return rates;
+          }
+          for (const item of data) {
+            const date = normalizeSettlementTime(new Date(Number(item.fundingTime)));
+            rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
           }
         } catch (error) {
-          warnings.push(`Binance 获取失败: ${formatFetchErrorMessage(error)}`);
+          if (isFailedToFetchError(error)) {
+            pushUniqueWarning(warnings, buildBrowserRestrictedWarning("Binance"));
+          } else {
+            pushUniqueWarning(warnings, `Binance 获取失败: ${formatFetchErrorMessage(error)}`);
+          }
         }
         return rates;
       }
@@ -1123,6 +2328,8 @@
       async function getOkxFundingRates(symbol, startDate, endDate, warnings) {
         const rates = [];
         const candidates = [`${symbol}-USD-SWAP`, `${symbol}-USDT-SWAP`];
+        const deferredWarnings = [];
+        let missingInstrumentCount = 0;
         for (const instId of candidates) {
           try {
             const data = await fetchJson("https://www.okx.com/api/v5/public/funding-rate-history", {
@@ -1130,7 +2337,12 @@
               limit: "100",
             });
             if (data?.code !== "0") {
-              warnings.push(`OKX 返回错误 (${instId}): ${data?.msg || "未知错误"}`);
+              const message = data?.msg || "未知错误";
+              if (isOkxMissingInstrumentMessage(message)) {
+                missingInstrumentCount += 1;
+              } else {
+                deferredWarnings.push(`OKX 返回错误 (${instId}): ${message}`);
+              }
               continue;
             }
             const items = Array.isArray(data?.data) ? data.data : [];
@@ -1141,7 +2353,14 @@
             }
             if (rates.length > 0) return rates;
           } catch (error) {
-            warnings.push(`OKX 获取失败 (${instId}): ${error.message}`);
+            deferredWarnings.push(`OKX 获取失败 (${instId}): ${error.message}`);
+          }
+        }
+        if (rates.length === 0) {
+          if (missingInstrumentCount === candidates.length) {
+            pushUniqueWarning(warnings, buildOkxUnsupportedSwapWarning(symbol, candidates));
+          } else if (deferredWarnings.length > 0) {
+            deferredWarnings.forEach((message) => pushUniqueWarning(warnings, message));
           }
         }
         return rates;
@@ -1211,8 +2430,14 @@
               limit: "5",
             }),
           ]);
+          if (current?.code && Number(current.code) !== 0) {
+            throw new Error(current.msg || "当前快照结果不可用");
+          }
+          if (!Array.isArray(history)) {
+            throw new Error(history?.msg || "历史快照结果不可用");
+          }
 
-          const historicalTimes = Array.isArray(history)
+          const historicalTimes = history.length > 0
             ? history.map((item) => normalizeSettlementTime(new Date(Number(item.fundingTime))).getTime())
             : historicalRows.map((row) => row.time.getTime());
           const cycleHours = inferCycleHours(historicalTimes);
@@ -1228,10 +2453,14 @@
         } catch (error) {
           const fallbackSnapshot = buildSnapshotFromHistorical("binance", historicalRows);
           if (fallbackSnapshot) {
-            warnings.push("BINANCE 当前周期快照直连失败，已回退为最近一笔历史结算值");
+            pushUniqueWarning(warnings, "BINANCE 当前周期快照直连失败，已回退为最近一笔历史结算值");
             return fallbackSnapshot;
           }
-          warnings.push(`BINANCE 当前周期快照获取失败: ${formatFetchErrorMessage(error)}`);
+          if (isFailedToFetchError(error)) {
+            pushUniqueWarning(warnings, buildBrowserRestrictedWarning("Binance"));
+          } else {
+            pushUniqueWarning(warnings, `BINANCE 当前周期快照获取失败: ${formatFetchErrorMessage(error)}`);
+          }
           return buildCurrentSnapshot({ exchange: "binance" });
         }
       }
@@ -1293,12 +2522,20 @@
 
       async function getOkxCurrentSnapshot(symbol, historicalRows, warnings) {
         const candidates = [`${symbol}-USD-SWAP`, `${symbol}-USDT-SWAP`];
+        let missingInstrumentCount = 0;
         for (const instId of candidates) {
           try {
             const [funding, mark] = await Promise.all([
               fetchJson("https://www.okx.com/api/v5/public/funding-rate", { instId }),
               fetchJson("https://www.okx.com/api/v5/public/mark-price", { instType: "SWAP", instId }),
             ]);
+            if (funding?.code && funding.code !== "0") {
+              if (isOkxMissingInstrumentMessage(funding?.msg || "")) {
+                missingInstrumentCount += 1;
+                continue;
+              }
+              continue;
+            }
             const fundingItem = Array.isArray(funding?.data) ? funding.data[0] : null;
             const markItem = Array.isArray(mark?.data) ? mark.data[0] : null;
             if (!fundingItem) continue;
@@ -1313,7 +2550,11 @@
           } catch (_error) {
           }
         }
-        warnings.push("OKX 当前周期快照获取失败: 当前合约或快照数据不可用");
+        if (missingInstrumentCount === candidates.length) {
+          pushUniqueWarning(warnings, buildOkxUnsupportedSwapWarning(symbol, candidates));
+        } else {
+          pushUniqueWarning(warnings, "OKX 当前周期快照获取失败: 当前合约或快照数据不可用");
+        }
         return buildCurrentSnapshot({ exchange: "okx" });
       }
 
@@ -1418,7 +2659,7 @@
           return {
             tone: "warn",
             title: "历史建议：先观望",
-            message: "同结算点历史样本不足，暂时无法结合资费周期和历史分布给出可靠建议。",
+            message: "可比历史样本不足，暂时无法结合资费周期和历史分布给出可靠建议。",
           };
         }
 
@@ -1478,13 +2719,15 @@
         const merged = new Map();
         for (const row of longRaw) {
           const key = row.time.getTime();
-          if (!merged.has(key)) merged.set(key, { time: row.time, longRate: null, shortRate: null });
+          if (!merged.has(key)) merged.set(key, { time: row.time, longRate: null, shortRate: null, longSettled: false, shortSettled: false });
           merged.get(key).longRate = row.rate;
+          merged.get(key).longSettled = true;
         }
         for (const row of shortRaw) {
           const key = row.time.getTime();
-          if (!merged.has(key)) merged.set(key, { time: row.time, longRate: null, shortRate: null });
+          if (!merged.has(key)) merged.set(key, { time: row.time, longRate: null, shortRate: null, longSettled: false, shortSettled: false });
           merged.get(key).shortRate = row.rate;
+          merged.get(key).shortSettled = true;
         }
 
         const settlementRows = [];
@@ -1527,10 +2770,14 @@
           }
 
           settlementRows.push({
+            timeMs: row.time.getTime(),
             settlementTime: formatDateTimeDisplay(row.time),
             longRate: settlementLongRate,
             shortRate: settlementShortRate,
             spread,
+            longSettled: row.longSettled,
+            shortSettled: row.shortSettled,
+            settlementCount: Number(row.longSettled) + Number(row.shortSettled),
           });
 
           if (spread !== null) {
@@ -1575,9 +2822,9 @@
           .sort((a, b) => a[0].localeCompare(b[0]))
           .map(([date, values]) => ({
             date,
-            longRate: values.longRate,
-            shortRate: values.shortRate,
-            spread: values.shortRate - values.longRate,
+            longRate: longAvailable ? values.longRate : null,
+            shortRate: shortAvailable ? values.shortRate : null,
+            spread: canComputeUnionSpread ? values.shortRate - values.longRate : null,
           }));
 
         const prediction = {
@@ -1614,11 +2861,11 @@
           currentSnapshot,
           recommendation: buildRecommendation(dailyRows, prediction),
           totals: {
-            longRate: totalLong,
-            shortRate: totalShort,
-            spread: totalShort - totalLong,
+            longRate: longAvailable ? totalLong : null,
+            shortRate: shortAvailable ? totalShort : null,
+            spread: canComputeUnionSpread ? totalShort - totalLong : null,
           },
-          warnings,
+          warnings: [...new Set(warnings)],
         };
       }
 
@@ -1712,30 +2959,33 @@
           const normalizedImpact = getPositionFundingImpact(data.normalized8hRate, impactSide);
           const dailyImpact = getPositionFundingImpact(data.dailyizedRate, impactSide);
           const annualImpact = getPositionFundingImpact(data.annualizedRate, impactSide);
+          const metaHtml = data.marketType === "spot"
+            ? `<span class="snapshot-cycle-tag">现货</span><span class="snapshot-next-time">无资金费</span>`
+            : `<span class="snapshot-cycle-tag">周期 ${formatCycle(data.cycleHours)}</span><span class="snapshot-next-time">${data.timingLabel || "下次"} ${data.nextFundingTime || "-"}</span>`;
           return `
           <div class="snapshot-side-card ${side === "多" ? "long" : "short"}">
             <div class="snapshot-side-head">
               <span class="snapshot-side-badge ${side === "多" ? "long" : "short"}">${side}</span>
               <div class="snapshot-side-labels">
                 <div class="snapshot-side-title">${side} · ${formatExchangeWithMarket(data.exchange, data.marketType || "futures")}</div>
-                <div class="snapshot-side-meta">${data.marketType === "spot" ? "现货 · 无资金费" : `周期 ${formatCycle(data.cycleHours)} · ${data.timingLabel || "下次"} ${data.nextFundingTime || "-"}`}</div>
+                <div class="snapshot-side-meta">${metaHtml}</div>
               </div>
             </div>
             <div class="snapshot-side-grid">
               <div class="snapshot-side-item">
-                <small>当前持仓影响</small>
+                <small>预测资金费率</small>
                 <strong class="${toClassName(currentImpact)}">${formatPercent(currentImpact)}</strong>
               </div>
               <div class="snapshot-side-item">
-                <small>8H 归一影响</small>
+                <small>8H 归一预测</small>
                 <strong class="${toClassName(normalizedImpact)}">${formatPercent(normalizedImpact)}</strong>
               </div>
               <div class="snapshot-side-item">
-                <small>日化影响</small>
+                <small>预测日化</small>
                 <strong class="${toClassName(dailyImpact)}">${formatPercentPerDay(dailyImpact)}</strong>
               </div>
               <div class="snapshot-side-item">
-                <small>年化影响</small>
+                <small>预测年化</small>
                 <strong class="${toClassName(annualImpact)}">${formatPercentPerYear(annualImpact)}</strong>
               </div>
               <div class="snapshot-side-item">
@@ -1749,15 +2999,21 @@
       }
 
       function renderDailyRows(result) {
-        document.getElementById("daily-long-header").textContent = `${formatExchangeWithMarket(result.longExchange, result.longMarketType)} 累计`;
-        document.getElementById("daily-short-header").textContent = `${formatExchangeWithMarket(result.shortExchange, result.shortMarketType)} 累计`;
+        document.getElementById("daily-long-header").textContent = `${formatExchangeWithMarket(result.longExchange, result.longMarketType)} 做多资金费率`;
+        document.getElementById("daily-short-header").textContent = `${formatExchangeWithMarket(result.shortExchange, result.shortMarketType)} 做空资金费率`;
 
         const body = document.getElementById("daily-table-body");
-        body.innerHTML = [...result.dailyRows].reverse().map((row) => `
+        const rows = result.dailyRowsForTable || result.dailyRows;
+        const tableLookbackDays = result.dailyRowsLookbackDays || result.displayLookbackDays || Number(DEFAULT_LOOKBACK_DAYS);
+        dailySummaryMeta.textContent = `默认展示近 ${formatLookbackLabel(tableLookbackDays)}；00:00 结算归到前一天`;
+        body.innerHTML = [...rows].reverse().map((row) => {
+          const longImpact = getPositionFundingImpact(row.longRate, "long");
+          const shortImpact = getPositionFundingImpact(row.shortRate, "short");
+          return `
           <tr>
             <td>${row.date}</td>
-            <td class="${toClassName(row.longRate)}">${formatPercent(row.longRate)}</td>
-            <td class="${toClassName(row.shortRate)}">${formatPercent(row.shortRate)}</td>
+            <td class="${toClassName(longImpact)}">${formatPercent(longImpact)}</td>
+            <td class="${toClassName(shortImpact)}">${formatPercent(shortImpact)}</td>
             <td class="${toClassName(row.spread)}">
               <div class="table-metric-stack">
                 <span>${formatPercent(row.spread)}</span>
@@ -1765,7 +3021,8 @@
               </div>
             </td>
           </tr>
-        `).join("");
+        `;
+        }).join("");
       }
 
       function renderSettlementRows(result) {
@@ -1783,18 +3040,439 @@
         `).join("");
       }
 
+      function renderTrendChart(result) {
+        const granularity = trendGranularitySelect.value || "1d";
+        const trendRows = buildTrendRows(result, granularity);
+        const actualSettlementRows = buildActualSettlementTrendRows(result);
+        const granularityLabel = getTrendGranularityLabel(granularity);
+        const zoomFactor = getTrendZoomFactor();
+        trendGranularityMeta.textContent = `绿线按 ${granularityLabel} 汇总趋势，琥珀虚线为实际结算点，横轴 ${zoomFactor}x`;
+        hideTrendTooltip();
+
+        if (trendRows.length === 0) {
+          const trendChartShell = trendChart.parentElement;
+          if (trendChartShell) {
+            trendChartShell.onmousemove = null;
+            trendChartShell.onmouseleave = null;
+          }
+          trendSummary.innerHTML = "";
+          trendChart.innerHTML = `<div class="trend-chart-empty">当前还没有可绘制的每日利差数据。</div>`;
+          hideTrendTooltip();
+          return;
+        }
+
+        const latestRow = trendRows[trendRows.length - 1];
+        const bestRow = trendRows.reduce((best, row) => (best === null || row.spread > best.spread ? row : best), null);
+        const worstRow = trendRows.reduce((worst, row) => (worst === null || row.spread < worst.spread ? row : worst), null);
+        const latestSettlementRow = actualSettlementRows[actualSettlementRows.length - 1] || null;
+
+        trendSummary.innerHTML = `
+          <div class="trend-stat">
+            <small>最新 ${granularityLabel} 利差</small>
+            <strong class="${toClassName(latestRow.spread)}">${formatPercent(latestRow.spread)}</strong>
+            <span>${latestRow.detailLabel} · ${formatPercentPerYear(annualizeTrendSpread(latestRow.spread, granularity))}</span>
+          </div>
+          <div class="trend-stat">
+            <small>区间最佳 ${granularityLabel}</small>
+            <strong class="${toClassName(bestRow.spread)}">${formatPercent(bestRow.spread)}</strong>
+            <span>${bestRow.detailLabel} · ${formatPercentPerYear(annualizeTrendSpread(bestRow.spread, granularity))}</span>
+          </div>
+          <div class="trend-stat">
+            <small>区间最弱 ${granularityLabel}</small>
+            <strong class="${toClassName(worstRow.spread)}">${formatPercent(worstRow.spread)}</strong>
+            <span>${worstRow.detailLabel} · ${formatPercentPerYear(annualizeTrendSpread(worstRow.spread, granularity))}</span>
+          </div>
+          <div class="trend-stat">
+            <small>最新实际结算点</small>
+            <strong class="${toClassName(latestSettlementRow ? latestSettlementRow.spread : null)}">${latestSettlementRow ? formatPercent(latestSettlementRow.spread) : "-"}</strong>
+            <span>${latestSettlementRow ? `${latestSettlementRow.detailLabel} · ${getSettlementStatusLabel(latestSettlementRow)}` : "当前窗口内暂无实际结算"}</span>
+          </div>
+        `;
+
+        const trendChartShell = trendChart.parentElement;
+        const shellClientWidth = trendChartShell
+          ? Math.max(960, Math.round(trendChartShell.clientWidth - 20))
+          : 960;
+        const shellClientHeight = trendChartShell
+          ? Math.max(320, Math.round(trendChartShell.clientHeight - 20))
+          : 320;
+        const chartWidth = Math.round(shellClientWidth * zoomFactor);
+        const chartHeight = shellClientHeight;
+        const padding = { top: 18, right: 18, bottom: 42, left: 58 };
+        const plotWidth = chartWidth - padding.left - padding.right;
+        const plotHeight = chartHeight - padding.top - padding.bottom;
+        const chartRowsForScale = [...trendRows, ...actualSettlementRows];
+        const values = chartRowsForScale.map((row) => row.spread);
+        let minValue = Math.min(...values, 0);
+        let maxValue = Math.max(...values, 0);
+
+        if (Math.abs(maxValue - minValue) < 1e-8) {
+          maxValue += 0.5;
+          minValue -= 0.5;
+        } else {
+          const buffer = (maxValue - minValue) * 0.12;
+          maxValue += buffer;
+          minValue -= buffer;
+        }
+
+        const timeStart = result.displayStartTimeMs ?? Math.min(...chartRowsForScale.map((row) => row.timeMs));
+        const timeEnd = result.displayEndTimeMs ?? Math.max(...chartRowsForScale.map((row) => row.timeMs));
+        const timeRange = Math.max(1, timeEnd - timeStart);
+        const xForTime = (timeMs) => (
+          timeEnd === timeStart
+            ? padding.left + (plotWidth / 2)
+            : padding.left + ((timeMs - timeStart) / timeRange) * plotWidth
+        );
+        const yForValue = (value) => (
+          padding.top + ((maxValue - value) / (maxValue - minValue)) * plotHeight
+        );
+        const zeroY = yForValue(0);
+
+        const points = trendRows.map((row, index) => ({
+          x: xForTime(row.timeMs),
+          y: yForValue(row.spread),
+          value: row.spread,
+          timeMs: row.timeMs,
+          row: trendRows[index],
+          seriesKind: "aggregate",
+        }));
+        const settlementPoints = actualSettlementRows.map((row) => ({
+          x: xForTime(row.timeMs),
+          y: yForValue(row.spread),
+          value: row.spread,
+          timeMs: row.timeMs,
+          row,
+          seriesKind: "settlement",
+        }));
+
+        const dayDividers = [];
+        if (granularity !== "1d" && trendRows.length > 1) {
+          const dividerDate = new Date(timeStart);
+          dividerDate.setHours(0, 0, 0, 0);
+          if (dividerDate.getTime() <= timeStart) {
+            dividerDate.setDate(dividerDate.getDate() + 1);
+          }
+
+          while (dividerDate.getTime() <= timeEnd) {
+            const dividerTime = dividerDate.getTime();
+            dayDividers.push({
+              x: xForTime(dividerTime),
+              label: formatShortDateLabel(formatDateDisplay(dividerDate)),
+            });
+            dividerDate.setDate(dividerDate.getDate() + 1);
+          }
+        }
+
+        const dayDividerLabels = [];
+        let lastDividerLabelX = -Infinity;
+        for (const divider of dayDividers) {
+          if (divider.x - lastDividerLabelX >= 56) {
+            dayDividerLabels.push(divider);
+            lastDividerLabelX = divider.x;
+          }
+        }
+
+        const tickCount = 5;
+        const gridLines = [];
+        for (let index = 0; index < tickCount; index += 1) {
+          const ratio = index / (tickCount - 1);
+          const y = padding.top + ratio * plotHeight;
+          const value = maxValue - (maxValue - minValue) * ratio;
+          gridLines.push({ y, value });
+        }
+
+        const xLabelIndexes = [...new Set(
+          trendRows.map((_row, index) => index).filter((index) => {
+            if (trendRows.length <= 6) return true;
+            const step = Math.ceil((trendRows.length - 1) / 5);
+            return index === 0 || index === trendRows.length - 1 || index % step === 0;
+          })
+        )];
+
+        const linePath = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
+        const settlementLinePath = settlementPoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
+        const areaPath = points.length > 0
+          ? `${linePath} L ${points[points.length - 1].x} ${zeroY} L ${points[0].x} ${zeroY} Z`
+          : "";
+
+        trendChart.innerHTML = `
+          <svg viewBox="0 0 ${chartWidth} ${chartHeight}" role="img" aria-label="每日利差走势" style="width:${chartWidth}px;height:auto;display:block">
+            <defs>
+              <linearGradient id="trend-area-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#136f63" stop-opacity="0.28"></stop>
+                <stop offset="100%" stop-color="#136f63" stop-opacity="0.03"></stop>
+              </linearGradient>
+            </defs>
+            ${gridLines.map((line) => `
+              <g>
+                <line class="chart-grid-line" x1="${padding.left}" y1="${line.y}" x2="${chartWidth - padding.right}" y2="${line.y}"></line>
+                <text class="chart-axis-label" x="${padding.left - 10}" y="${line.y + 4}" text-anchor="end">${formatPercent(line.value)}</text>
+              </g>
+            `).join("")}
+            ${dayDividers.map((divider) => `
+              <line class="chart-day-divider" x1="${divider.x}" y1="${padding.top}" x2="${divider.x}" y2="${chartHeight - padding.bottom}"></line>
+            `).join("")}
+            ${dayDividerLabels.map((divider) => `
+              <text class="chart-day-label" x="${divider.x + 3}" y="${padding.top + 10}" text-anchor="start">${divider.label} 00:00</text>
+            `).join("")}
+            <line data-hover-line class="chart-hover-line" x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${chartHeight - padding.bottom}" style="display:none"></line>
+            <g>
+              <line class="chart-zero-line" x1="${padding.left}" y1="${zeroY}" x2="${chartWidth - padding.right}" y2="${zeroY}"></line>
+              <text class="chart-axis-label zero" x="${padding.left - 10}" y="${zeroY + 4}" text-anchor="end">0.0000%</text>
+            </g>
+            ${areaPath ? `<path class="chart-area" d="${areaPath}" style="fill:url(#trend-area-fill)"></path>` : ""}
+            ${linePath ? `<path class="chart-line" d="${linePath}"></path>` : ""}
+            ${settlementLinePath ? `<path class="chart-settlement-line" d="${settlementLinePath}"></path>` : ""}
+            ${points.map((point, index) => `
+              <g class="chart-point-group" data-point-index="${index}">
+                <title>${buildTrendTooltipText(trendRows[index], result)}</title>
+                <circle class="chart-hit-area" cx="${point.x}" cy="${point.y}" r="12"></circle>
+                <circle class="chart-point ${toClassName(point.value)}" cx="${point.x}" cy="${point.y}" r="4.5"></circle>
+              </g>
+            `).join("")}
+            ${settlementPoints.map((point, index) => `
+              <g class="chart-point-group" data-settlement-point-index="${index}">
+                <title>${buildTrendTooltipText(actualSettlementRows[index], result)}</title>
+                <circle class="chart-hit-area" cx="${point.x}" cy="${point.y}" r="14"></circle>
+                <circle class="chart-settlement-point ${toClassName(point.value)}" cx="${point.x}" cy="${point.y}" r="5.2"></circle>
+              </g>
+            `).join("")}
+            ${xLabelIndexes.map((index) => `
+              <text class="chart-axis-label" x="${xForTime(trendRows[index].timeMs)}" y="${chartHeight - 12}" text-anchor="middle">${trendRows[index].axisLabel}</text>
+            `).join("")}
+          </svg>
+        `;
+
+        trendChartShell.onmousemove = (event) => {
+          if (trendDragState) return;
+
+          const svg = trendChart.querySelector("svg");
+          const hoverLine = trendChart.querySelector("[data-hover-line]");
+          const hoverItems = [...points, ...settlementPoints];
+          if (!svg || !hoverLine || hoverItems.length === 0) return;
+
+          const svgRect = svg.getBoundingClientRect();
+          const chartX = (event.clientX - svgRect.left) * (chartWidth / svgRect.width);
+          const minX = padding.left;
+          const maxX = chartWidth - padding.right;
+
+          if (chartX < minX || chartX > maxX) {
+            hideTrendTooltip();
+            return;
+          }
+
+          let nearestItem = hoverItems[0];
+          let nearestDistance = Infinity;
+          const seriesPriority = { settlement: 2, aggregate: 1 };
+          hoverItems.forEach((point) => {
+            const distance = Math.abs(point.x - chartX);
+            const sameDistanceHigherPriority =
+              Math.abs(distance - nearestDistance) < 0.001 &&
+              (seriesPriority[point.seriesKind] || 0) > (seriesPriority[nearestItem.seriesKind] || 0);
+            if (distance < nearestDistance || sameDistanceHigherPriority) {
+              nearestDistance = distance;
+              nearestItem = point;
+            }
+          });
+
+          hoverLine.setAttribute("x1", String(nearestItem.x));
+          hoverLine.setAttribute("x2", String(nearestItem.x));
+          hoverLine.style.display = "block";
+
+          const pointAnchor = {
+            clientX: svgRect.left + (nearestItem.x * (svgRect.width / chartWidth)),
+            clientY: svgRect.top + (nearestItem.y * (svgRect.height / chartHeight)),
+          };
+          showTrendTooltip(event, nearestItem.row, result, pointAnchor);
+        };
+        trendChartShell.onmouseleave = () => {
+          if (!trendDragState) {
+            hideTrendTooltip();
+          }
+        };
+      }
+
+      function buildDailyRowsFromSettlementRows(settlementRows, { longAvailable, shortAvailable, canComputeUnionSpread }) {
+        const dailyStats = new Map();
+
+        for (const row of settlementRows) {
+          const statsDate = new Date(row.timeMs);
+          if (statsDate.getHours() === 0 && statsDate.getMinutes() === 0) {
+            statsDate.setDate(statsDate.getDate() - 1);
+          }
+          const statsKey = formatDateDisplay(statsDate);
+          if (!dailyStats.has(statsKey)) {
+            dailyStats.set(statsKey, { longRate: 0, shortRate: 0 });
+          }
+          const currentDaily = dailyStats.get(statsKey);
+
+          if (row.longRate !== null) {
+            currentDaily.longRate += row.longRate;
+          }
+          if (row.shortRate !== null) {
+            currentDaily.shortRate += row.shortRate;
+          }
+        }
+
+        return Array.from(dailyStats.entries())
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map(([date, values]) => ({
+            date,
+            longRate: longAvailable ? values.longRate : null,
+            shortRate: shortAvailable ? values.shortRate : null,
+            spread: canComputeUnionSpread ? values.shortRate - values.longRate : null,
+          }));
+      }
+
+      function buildDisplayResultFromFetched(result, lookbackDays) {
+        const endTimeMs = result.fetchedEndTimeMs || Date.now();
+        const startTimeMs = endTimeMs - lookbackDays * DAY_MS;
+        const startDate = new Date(startTimeMs);
+        const endDate = new Date(endTimeMs);
+        const settlementRows = result.settlementRows
+          .filter((row) => row.timeMs >= startTimeMs && row.timeMs <= endTimeMs);
+        const longAvailable = result.totals.longRate !== null;
+        const shortAvailable = result.totals.shortRate !== null;
+        const canComputeUnionSpread = result.totals.spread !== null;
+        const dailyStats = new Map();
+        const comparableTimes = [];
+        let totalLong = 0;
+        let totalShort = 0;
+        let currentSpread = null;
+
+        for (const row of settlementRows) {
+          const statsDate = new Date(row.timeMs);
+          if (statsDate.getHours() === 0 && statsDate.getMinutes() === 0) {
+            statsDate.setDate(statsDate.getDate() - 1);
+          }
+          const statsKey = formatDateDisplay(statsDate);
+          if (!dailyStats.has(statsKey)) {
+            dailyStats.set(statsKey, { longRate: 0, shortRate: 0 });
+          }
+          const currentDaily = dailyStats.get(statsKey);
+
+          if (row.longRate !== null) {
+            currentDaily.longRate += row.longRate;
+            totalLong += row.longRate;
+          }
+          if (row.shortRate !== null) {
+            currentDaily.shortRate += row.shortRate;
+            totalShort += row.shortRate;
+          }
+          if (row.spread !== null) {
+            comparableTimes.push(row.timeMs);
+            currentSpread = row.spread;
+          }
+        }
+
+        let settlementsPerDay = null;
+        if (comparableTimes.length >= 2) {
+          const intervals = [];
+          for (let index = 1; index < comparableTimes.length; index += 1) {
+            const interval = comparableTimes[index] - comparableTimes[index - 1];
+            if (interval > 0) intervals.push(interval);
+          }
+          if (intervals.length > 0) {
+            intervals.sort((a, b) => a - b);
+            const medianInterval = intervals[Math.floor(intervals.length / 2)];
+            settlementsPerDay = DAY_MS / medianInterval;
+          }
+        }
+
+        const estimatedDailyInterest =
+          currentSpread !== null && settlementsPerDay !== null
+            ? currentSpread * settlementsPerDay
+            : null;
+        const predictedAnnualizedSpread =
+          estimatedDailyInterest !== null ? estimatedDailyInterest * 365 : null;
+        const cycleHours =
+          settlementsPerDay !== null && settlementsPerDay > 0 ? 24 / settlementsPerDay : null;
+        const dailyRows = buildDailyRowsFromSettlementRows(settlementRows, {
+          longAvailable,
+          shortAvailable,
+          canComputeUnionSpread,
+        });
+        const dailyRowsLookbackDays = Math.min(
+          result.fetchedLookbackDays || latestFetchedLookbackDays || lookbackDays,
+          Math.max(Math.ceil(lookbackDays), Number(DEFAULT_LOOKBACK_DAYS))
+        );
+        const dailyTableStartTimeMs = endTimeMs - dailyRowsLookbackDays * DAY_MS;
+        const dailyRowsForTable = buildDailyRowsFromSettlementRows(
+          result.settlementRows.filter((row) => row.timeMs >= dailyTableStartTimeMs && row.timeMs <= endTimeMs),
+          { longAvailable, shortAvailable, canComputeUnionSpread }
+        ).slice(-dailyRowsLookbackDays);
+        const prediction = {
+          latestSpread: currentSpread,
+          settlementsPerDay,
+          cycleHours,
+          predictedDailySpread: estimatedDailyInterest,
+          predictedAnnualizedSpread,
+        };
+
+        return {
+          ...result,
+          startTime: formatDateTimeDisplay(startDate),
+          endTime: formatDateTimeDisplay(endDate),
+          settlementRows,
+          dailyRows,
+          dailyRowsForTable,
+          dailyRowsLookbackDays,
+          prediction,
+          recommendation: buildRecommendation(dailyRows, prediction),
+          totals: {
+            longRate: longAvailable ? totalLong : null,
+            shortRate: shortAvailable ? totalShort : null,
+            spread: canComputeUnionSpread ? totalShort - totalLong : null,
+          },
+          displayLookbackDays: lookbackDays,
+          displayStartTimeMs: startTimeMs,
+          displayEndTimeMs: endTimeMs,
+        };
+      }
+
+      function renderSelectedLookbackFromCache() {
+        if (!latestFetchedAnalysisResult) return false;
+
+        let lookbackDays;
+        try {
+          lookbackDays = readLookbackDays();
+          errorBox.innerHTML = "";
+        } catch (error) {
+          setAlert(errorBox, "error", [error.message || String(error)]);
+          return false;
+        }
+
+        if (lookbackDays > latestFetchedLookbackDays) {
+          setAlert(warningBox, "warn", [
+            `当前已加载 ${formatLookbackLabel(latestFetchedLookbackDays)} 数据；要查看 ${formatLookbackLabel(lookbackDays)}，请点击“开始分析”重新拉取。`,
+          ]);
+          return false;
+        }
+
+        const displayResult = buildDisplayResultFromFetched(latestFetchedAnalysisResult, lookbackDays);
+        renderResult(displayResult);
+        return true;
+      }
+
       function renderResult(result) {
+        latestAnalysisResult = result;
+        resultsEl.classList.add("visible");
         renderSummary(result);
         renderCurrentSnapshot(result);
         renderRecommendation(result);
         renderDailyRows(result);
         renderSettlementRows(result);
         setAlert(warningBox, "warn", result.warnings);
-        resultsEl.classList.add("visible");
+        scheduleTablePanelSync();
+        requestAnimationFrame(() => {
+          if (latestAnalysisResult === result) {
+            renderTrendChart(result);
+          }
+        });
       }
 
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
+      async function runAnalysis() {
+        if (runButton.disabled) return;
         errorBox.innerHTML = "";
         warningBox.innerHTML = "";
         recommendationBox.innerHTML = "";
@@ -1804,14 +3482,12 @@
         runButton.textContent = "分析中...";
 
         try {
-          const lookbackDays = Number(lookbackDaysInput.value);
-          if (!Number.isFinite(lookbackDays) || lookbackDays <= 0) {
-            throw new Error("天数必须大于 0");
-          }
+          const requestedLookbackDays = readLookbackDays();
+          const fetchLookbackDays = Math.max(requestedLookbackDays, Number(DEFAULT_LOOKBACK_DAYS));
 
           const endDate = new Date();
           endDate.setSeconds(0, 0);
-          const startDate = new Date(endDate.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
+          const startDate = new Date(endDate.getTime() - fetchLookbackDays * DAY_MS);
 
           const result = await analyzeFundingRates({
             symbol: symbolInput.value.trim().toUpperCase(),
@@ -1822,18 +3498,128 @@
             startDate,
             endDate,
           });
-          renderResult(result);
+          result.fetchedStartTimeMs = startDate.getTime();
+          result.fetchedEndTimeMs = endDate.getTime();
+          result.fetchedLookbackDays = fetchLookbackDays;
+          latestFetchedAnalysisResult = result;
+          latestFetchedLookbackDays = fetchLookbackDays;
+          renderSelectedLookbackFromCache();
         } catch (error) {
           setAlert(errorBox, "error", [error.message || String(error)]);
         } finally {
           runButton.disabled = false;
           runButton.textContent = "开始分析";
         }
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        await runAnalysis();
       });
 
       fillExchangeOptions();
-      setDefaultFormValues();
+      fillLookbackPresetOptions();
+      fillTrendGranularityOptions();
+      fillTrendZoomOptions();
+      restoreFormState();
       swapExchangesButton.addEventListener("click", swapSelectedExchanges);
+      form.addEventListener("input", saveFormState);
+      form.addEventListener("change", saveFormState);
+      lookbackPresetSelect.addEventListener("change", applyLookbackPreset);
+      lookbackDaysInput.addEventListener("input", syncLookbackPresetFromInput);
+      lookbackDaysInput.addEventListener("change", handleLookbackDaysCommitted);
+      const trendChartShell = trendChart.parentElement;
+      let trendDragState = null;
+
+      trendChartShell.addEventListener("wheel", (event) => {
+        if (!latestAnalysisResult) return;
+
+        const deltaX = Number(event.deltaX || 0);
+        const deltaY = Number(event.deltaY || 0);
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+        const pinchZoom = event.ctrlKey;
+        const horizontalPan = !pinchZoom && (event.shiftKey || absX > absY * 1.15);
+        const verticalZoom = pinchZoom || (!horizontalPan && absY > absX * 1.15);
+
+        if (horizontalPan) {
+          const panDelta = event.shiftKey && absX < 0.5 ? deltaY : deltaX;
+          const changed = panTrendHorizontally(panDelta);
+          if (changed) {
+            event.preventDefault();
+          }
+          return;
+        }
+
+        if (verticalZoom) {
+          const direction = deltaY < 0 ? 1 : -1;
+          const changed = stepTrendZoom(direction, event.clientX);
+          if (changed) {
+            event.preventDefault();
+          }
+          return;
+        }
+
+        if (absX > 0.5) {
+          const changed = panTrendHorizontally(deltaX);
+          if (changed) {
+            event.preventDefault();
+          }
+        }
+      }, { passive: false });
+
+      trendChartShell.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
+        if (event.target && event.target.closest && event.target.closest("select")) return;
+        trendDragState = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startScrollLeft: trendChartShell.scrollLeft,
+        };
+        trendChartShell.classList.add("dragging");
+        hideTrendTooltip();
+        if (trendChartShell.setPointerCapture) {
+          trendChartShell.setPointerCapture(event.pointerId);
+        }
+      });
+
+      trendChartShell.addEventListener("pointermove", (event) => {
+        if (!trendDragState || trendDragState.pointerId !== event.pointerId) return;
+        const deltaX = trendDragState.startX - event.clientX;
+        trendChartShell.scrollLeft = trendDragState.startScrollLeft + deltaX;
+        event.preventDefault();
+      });
+
+      function clearTrendDrag(event) {
+        if (!trendDragState) return;
+        if (event && trendDragState.pointerId !== undefined && event.pointerId !== trendDragState.pointerId) return;
+        trendDragState = null;
+        trendChartShell.classList.remove("dragging");
+      }
+
+      trendChartShell.addEventListener("pointerup", clearTrendDrag);
+      trendChartShell.addEventListener("pointercancel", clearTrendDrag);
+      trendChartShell.addEventListener("pointerleave", (event) => {
+        if (!trendDragState) return;
+        if ((event.buttons || 0) === 0) {
+          clearTrendDrag(event);
+        }
+      });
+      trendGranularitySelect.addEventListener("change", () => {
+        saveFormState();
+        if (latestAnalysisResult) {
+          renderTrendChart(latestAnalysisResult);
+        }
+      });
+      trendZoomSelect.addEventListener("change", () => {
+        syncTrendZoomStatus();
+        saveFormState();
+      });
+      window.addEventListener("resize", scheduleTablePanelSync);
+
+      requestAnimationFrame(() => {
+        runAnalysis();
+      });
     </script>
   </body>
 </html>
