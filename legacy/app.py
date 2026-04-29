@@ -1,3 +1,8 @@
+"""Legacy Flask entrypoint kept only as an archived fallback.
+
+The actively maintained product entry is the root `index.html`.
+"""
+
 from datetime import datetime, timedelta
 
 from flask import Flask, render_template, request

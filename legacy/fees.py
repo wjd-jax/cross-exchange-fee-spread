@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""Legacy CLI entrypoint kept only as an archived fallback.
+
+The actively maintained product entry is the root `index.html`.
+"""
+
 from datetime import datetime, timedelta
 
 from src.funding_analysis import (

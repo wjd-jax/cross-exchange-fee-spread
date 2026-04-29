@@ -128,16 +128,19 @@
 
       .exchange-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr);
         gap: 10px;
-        align-items: end;
+      }
+
+      .side-config {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 88px;
+        gap: 8px;
       }
 
       .swap-wrap {
         display: flex;
         align-items: center;
-        justify-content: center;
-        padding-bottom: 2px;
+        justify-content: flex-start;
       }
 
       .swap-button {
@@ -427,6 +430,18 @@
         letter-spacing: 0.04em;
       }
 
+      .table-metric-stack {
+        display: grid;
+        gap: 2px;
+        justify-items: end;
+      }
+
+      .table-metric-stack small {
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.3;
+      }
+
       .section-head {
         display: flex;
         justify-content: space-between;
@@ -663,14 +678,20 @@
               <div class="exchange-grid field full">
                 <div class="field">
                   <label for="long_exchange">做多交易所</label>
-                  <select id="long_exchange" name="long_exchange"></select>
+                  <div class="side-config">
+                    <select id="long_exchange" name="long_exchange"></select>
+                    <select id="long_market_type" name="long_market_type" aria-label="做多市场类型"></select>
+                  </div>
                 </div>
                 <div class="swap-wrap">
                   <button id="swap-exchanges" class="swap-button" type="button" aria-label="互换多空交易所">⇄</button>
                 </div>
                 <div class="field">
                   <label for="short_exchange">做空交易所</label>
-                  <select id="short_exchange" name="short_exchange"></select>
+                  <div class="side-config">
+                    <select id="short_exchange" name="short_exchange"></select>
+                    <select id="short_market_type" name="short_market_type" aria-label="做空市场类型"></select>
+                  </div>
                 </div>
               </div>
               <div class="field full">
@@ -679,7 +700,7 @@
               </div>
             </div>
             <div class="actions">
-              <div class="hint">结束时间默认取当前时刻，支持一键互换多空交易所。</div>
+              <div class="hint">结束时间默认取当前时刻，支持一键互换多空交易所，默认两边都按合约口径计算。</div>
               <button id="run-button" type="submit">开始分析</button>
             </div>
           </form>
@@ -767,7 +788,7 @@
                     <th>统计日期</th>
                     <th id="daily-long-header"></th>
                     <th id="daily-short-header"></th>
-                    <th>当日总利差</th>
+                    <th>当日总利差 / 年化</th>
                   </tr>
                 </thead>
                 <tbody id="daily-table-body"></tbody>
@@ -778,7 +799,7 @@
           <section class="panel">
             <div class="section-head">
               <h2>详细结算明细</h2>
-              <span>仅在两边同一结算时刻都存在数据时才计算利差</span>
+              <span>按任一边结算时点计算；另一边该时刻无结算则按 0 计入</span>
             </div>
             <div style="overflow:auto;">
               <table>
@@ -807,11 +828,27 @@
         { value: "okx", label: "okx" },
         { value: "gateio", label: "gateio" },
       ];
+      const MARKET_TYPE_OPTIONS = [
+        { value: "futures", label: "合约" },
+        { value: "spot", label: "现货" },
+      ];
+      const BINANCE_FUTURES_BASES = [
+        "https://fapi.binance.com",
+        "https://fapi1.binance.com",
+        "https://fapi2.binance.com",
+        "https://fapi3.binance.com",
+      ];
+      const BYBIT_API_BASES = [
+        "https://api.bybit.com",
+        "https://api.bytick.com",
+      ];
 
       const form = document.getElementById("analysis-form");
       const symbolInput = document.getElementById("symbol");
       const longExchangeSelect = document.getElementById("long_exchange");
       const shortExchangeSelect = document.getElementById("short_exchange");
+      const longMarketTypeSelect = document.getElementById("long_market_type");
+      const shortMarketTypeSelect = document.getElementById("short_market_type");
       const lookbackDaysInput = document.getElementById("lookback_days");
       const swapExchangesButton = document.getElementById("swap-exchanges");
       const runButton = document.getElementById("run-button");
@@ -885,6 +922,15 @@
         return match ? match.label : exchange;
       }
 
+      function getMarketTypeLabel(marketType) {
+        const match = MARKET_TYPE_OPTIONS.find((option) => option.value === marketType);
+        return match ? match.label : marketType;
+      }
+
+      function formatExchangeWithMarket(exchange, marketType) {
+        return `${getExchangeLabel(exchange)} ${getMarketTypeLabel(marketType)}`;
+      }
+
       function formatRatio(value) {
         if (value === null || value === undefined || !Number.isFinite(value)) return "-";
         return `${value.toFixed(2)} 次/天`;
@@ -910,6 +956,17 @@
         return `${value.toFixed(2)}H`;
       }
 
+      function formatFetchErrorMessage(error) {
+        const message = error?.message || String(error);
+        if (message === "Failed to fetch") {
+          return "Failed to fetch（可能是浏览器直连被目标站点拦截，或当前网络暂时无法连到该交易所）";
+        }
+        if (message === "request timeout") {
+          return "请求超时（目标交易所响应过慢，已自动切换或跳过）";
+        }
+        return message;
+      }
+
       function percentile(values, quantile) {
         if (!values || values.length === 0) return null;
         const sorted = [...values].sort((a, b) => a - b);
@@ -930,42 +987,78 @@
       }
 
       function fillExchangeOptions() {
-        const options = EXCHANGE_OPTIONS
+        const exchangeOptions = EXCHANGE_OPTIONS
           .map((exchange) => `<option value="${exchange.value}">${exchange.label}</option>`)
           .join("");
-        longExchangeSelect.innerHTML = options;
-        shortExchangeSelect.innerHTML = options;
+        const marketTypeOptions = MARKET_TYPE_OPTIONS
+          .map((option) => `<option value="${option.value}">${option.label}</option>`)
+          .join("");
+        longExchangeSelect.innerHTML = exchangeOptions;
+        shortExchangeSelect.innerHTML = exchangeOptions;
+        longMarketTypeSelect.innerHTML = marketTypeOptions;
+        shortMarketTypeSelect.innerHTML = marketTypeOptions;
       }
 
       function setDefaultFormValues() {
         symbolInput.value = "KAT";
         longExchangeSelect.value = "bybit";
         shortExchangeSelect.value = "binance";
+        longMarketTypeSelect.value = "futures";
+        shortMarketTypeSelect.value = "futures";
         lookbackDaysInput.value = "10";
       }
 
       function swapSelectedExchanges() {
         const currentLong = longExchangeSelect.value;
+        const currentLongMarketType = longMarketTypeSelect.value;
         longExchangeSelect.value = shortExchangeSelect.value;
         shortExchangeSelect.value = currentLong;
+        longMarketTypeSelect.value = shortMarketTypeSelect.value;
+        shortMarketTypeSelect.value = currentLongMarketType;
       }
 
       async function fetchJson(url, params) {
         const fullUrl = `${url}?${new URLSearchParams(params).toString()}`;
-        const response = await fetch(fullUrl, {
-          method: "GET",
-          headers: { "Accept": "application/json" },
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        try {
+          const response = await fetch(fullUrl, {
+            method: "GET",
+            headers: { "Accept": "application/json" },
+            cache: "no-store",
+            credentials: "omit",
+            signal: controller.signal,
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          return await response.json();
+        } catch (error) {
+          if (error?.name === "AbortError") {
+            throw new Error("request timeout");
+          }
+          throw error;
+        } finally {
+          clearTimeout(timeoutId);
         }
-        return await response.json();
+      }
+
+      async function fetchJsonFromBaseCandidates(baseUrls, path, params) {
+        let lastError = null;
+        for (const baseUrl of baseUrls) {
+          try {
+            return await fetchJson(`${baseUrl}${path}`, params);
+          } catch (error) {
+            lastError = error;
+          }
+        }
+        throw lastError || new Error("request failed");
       }
 
       async function getBinanceFundingRates(symbol, startDate, endDate, warnings) {
         const rates = [];
         try {
-          const data = await fetchJson("https://fapi.binance.com/fapi/v1/fundingRate", {
+          const data = await fetchJsonFromBaseCandidates(BINANCE_FUTURES_BASES, "/fapi/v1/fundingRate", {
             symbol: `${symbol}USDT`,
             startTime: String(startDate.getTime()),
             endTime: String(endDate.getTime() + 2000),
@@ -978,7 +1071,7 @@
             }
           }
         } catch (error) {
-          warnings.push(`Binance 获取失败: ${error.message}`);
+          warnings.push(`Binance 获取失败: ${formatFetchErrorMessage(error)}`);
         }
         return rates;
       }
@@ -1009,7 +1102,7 @@
       async function getBybitFundingRates(symbol, startDate, endDate, warnings) {
         const rates = [];
         try {
-          const data = await fetchJson("https://api.bybit.com/v5/market/funding/history", {
+          const data = await fetchJsonFromBaseCandidates(BYBIT_API_BASES, "/v5/market/funding/history", {
             category: "linear",
             symbol: `${symbol}USDT`,
             endTime: String(endDate.getTime() + 2000),
@@ -1022,7 +1115,7 @@
             rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
           }
         } catch (error) {
-          warnings.push(`Bybit 获取失败: ${error.message}`);
+          warnings.push(`Bybit 获取失败: ${formatFetchErrorMessage(error)}`);
         }
         return rates;
       }
@@ -1075,13 +1168,45 @@
         return rates;
       }
 
+      function buildSnapshotFromHistorical(exchange, historicalRows) {
+        if (!historicalRows || historicalRows.length === 0) return null;
+        const latestRow = historicalRows.reduce((latest, current) => {
+          if (!latest) return current;
+          return current.time > latest.time ? current : latest;
+        }, null);
+        return buildCurrentSnapshot({
+          exchange,
+          currentRate: latestRow ? latestRow.rate : null,
+          cycleHours: inferCycleHours(historicalRows.map((row) => row.time.getTime())),
+          nextFundingTime: latestRow ? formatDateTimeDisplay(latestRow.time) : null,
+          timingLabel: "最近",
+        });
+      }
+
+      function buildSpotSnapshot(exchange) {
+        return {
+          exchange,
+          marketType: "spot",
+          currentRate: 0,
+          cycleHours: null,
+          normalized8hRate: 0,
+          dailyizedRate: 0,
+          annualizedRate: 0,
+          markPrice: null,
+          indexPrice: null,
+          basisPercent: null,
+          nextFundingTime: "无资金费",
+          timingLabel: "说明",
+        };
+      }
+
       async function getBinanceCurrentSnapshot(symbol, historicalRows, warnings) {
         try {
           const [current, history] = await Promise.all([
-            fetchJson("https://fapi.binance.com/fapi/v1/premiumIndex", {
+            fetchJsonFromBaseCandidates(BINANCE_FUTURES_BASES, "/fapi/v1/premiumIndex", {
               symbol: `${symbol}USDT`,
             }),
-            fetchJson("https://fapi.binance.com/fapi/v1/fundingRate", {
+            fetchJsonFromBaseCandidates(BINANCE_FUTURES_BASES, "/fapi/v1/fundingRate", {
               symbol: `${symbol}USDT`,
               limit: "5",
             }),
@@ -1101,14 +1226,19 @@
             nextFundingTime: formatDateTimeDisplay(new Date(Number(current.nextFundingTime))),
           });
         } catch (error) {
-          warnings.push(`BINANCE 当前周期快照获取失败: ${error.message}`);
+          const fallbackSnapshot = buildSnapshotFromHistorical("binance", historicalRows);
+          if (fallbackSnapshot) {
+            warnings.push("BINANCE 当前周期快照直连失败，已回退为最近一笔历史结算值");
+            return fallbackSnapshot;
+          }
+          warnings.push(`BINANCE 当前周期快照获取失败: ${formatFetchErrorMessage(error)}`);
           return buildCurrentSnapshot({ exchange: "binance" });
         }
       }
 
-      async function getBybitCurrentSnapshot(symbol, warnings) {
+      async function getBybitCurrentSnapshot(symbol, historicalRows, warnings) {
         try {
-          const data = await fetchJson("https://api.bybit.com/v5/market/tickers", {
+          const data = await fetchJsonFromBaseCandidates(BYBIT_API_BASES, "/v5/market/tickers", {
             category: "linear",
             symbol: `${symbol}USDT`,
           });
@@ -1123,7 +1253,12 @@
             nextFundingTime: formatDateTimeDisplay(new Date(Number(item.nextFundingTime))),
           });
         } catch (error) {
-          warnings.push(`BYBIT 当前周期快照获取失败: ${error.message}`);
+          const fallbackSnapshot = buildSnapshotFromHistorical("bybit", historicalRows);
+          if (fallbackSnapshot) {
+            warnings.push("BYBIT 当前周期快照直连失败，已回退为最近一笔历史结算值");
+            return fallbackSnapshot;
+          }
+          warnings.push(`BYBIT 当前周期快照获取失败: ${formatFetchErrorMessage(error)}`);
           return buildCurrentSnapshot({ exchange: "bybit" });
         }
       }
@@ -1209,7 +1344,7 @@
 
       const currentSnapshotFetchers = {
         binance: getBinanceCurrentSnapshot,
-        bybit: (symbol, _historicalRows, warnings) => getBybitCurrentSnapshot(symbol, warnings),
+        bybit: getBybitCurrentSnapshot,
         bitget: (symbol, _historicalRows, warnings) => getBitgetCurrentSnapshot(symbol, warnings),
         okx: getOkxCurrentSnapshot,
         gateio: (symbol, _historicalRows, warnings) => getGateioCurrentSnapshot(symbol, warnings),
@@ -1241,11 +1376,13 @@
 
       function buildCurrentSnapshot({
         exchange,
+        marketType = "futures",
         currentRate = null,
         cycleHours = null,
         markPrice = null,
         indexPrice = null,
         nextFundingTime = null,
+        timingLabel = "下次",
       }) {
         const normalized8hRate =
           currentRate !== null && cycleHours !== null && cycleHours !== 0
@@ -1258,6 +1395,7 @@
         const annualizedRate = dailyizedRate !== null ? dailyizedRate * 365 : null;
         return {
           exchange,
+          marketType,
           currentRate,
           cycleHours,
           normalized8hRate,
@@ -1267,6 +1405,7 @@
           indexPrice,
           basisPercent: calcBasisPercent(markPrice, indexPrice),
           nextFundingTime,
+          timingLabel,
         };
       }
 
@@ -1320,7 +1459,7 @@
         };
       }
 
-      async function analyzeFundingRates({ symbol, longExchange, shortExchange, startDate, endDate }) {
+      async function analyzeFundingRates({ symbol, longExchange, shortExchange, longMarketType, shortMarketType, startDate, endDate }) {
         if (!symbol) throw new Error("币种不能为空");
         if (!exchangeFetchers[longExchange]) throw new Error(`不支持的做多交易所: ${longExchange}`);
         if (!exchangeFetchers[shortExchange]) throw new Error(`不支持的做空交易所: ${shortExchange}`);
@@ -1328,12 +1467,12 @@
 
         const warnings = [];
         const [longRaw, shortRaw] = await Promise.all([
-          exchangeFetchers[longExchange](symbol, startDate, endDate, warnings),
-          exchangeFetchers[shortExchange](symbol, startDate, endDate, warnings),
+          longMarketType === "spot" ? [] : exchangeFetchers[longExchange](symbol, startDate, endDate, warnings),
+          shortMarketType === "spot" ? [] : exchangeFetchers[shortExchange](symbol, startDate, endDate, warnings),
         ]);
         const [longCurrentSnapshot, shortCurrentSnapshot] = await Promise.all([
-          currentSnapshotFetchers[longExchange](symbol, longRaw, warnings),
-          currentSnapshotFetchers[shortExchange](symbol, shortRaw, warnings),
+          longMarketType === "spot" ? buildSpotSnapshot(longExchange) : currentSnapshotFetchers[longExchange](symbol, longRaw, warnings),
+          shortMarketType === "spot" ? buildSpotSnapshot(shortExchange) : currentSnapshotFetchers[shortExchange](symbol, shortRaw, warnings),
         ]);
 
         const merged = new Map();
@@ -1351,6 +1490,9 @@
         const settlementRows = [];
         const dailyStats = new Map();
         const comparableTimes = [];
+        const longAvailable = longMarketType === "spot" || longRaw.length > 0;
+        const shortAvailable = shortMarketType === "spot" || shortRaw.length > 0;
+        const canComputeUnionSpread = longAvailable && shortAvailable;
         let totalLong = 0;
         let totalShort = 0;
 
@@ -1358,7 +1500,12 @@
         for (const row of sortedRows) {
           const longRate = row.longRate;
           const shortRate = row.shortRate;
-          const spread = longRate !== null && shortRate !== null ? shortRate - longRate : null;
+          const settlementLongRate = longRate !== null ? longRate : (canComputeUnionSpread ? 0 : null);
+          const settlementShortRate = shortRate !== null ? shortRate : (canComputeUnionSpread ? 0 : null);
+          const spread =
+            settlementLongRate !== null && settlementShortRate !== null
+              ? settlementShortRate - settlementLongRate
+              : null;
 
           const statsDate = new Date(row.time);
           if (statsDate.getHours() === 0 && statsDate.getMinutes() === 0) {
@@ -1381,8 +1528,8 @@
 
           settlementRows.push({
             settlementTime: formatDateTimeDisplay(row.time),
-            longRate,
-            shortRate,
+            longRate: settlementLongRate,
+            shortRate: settlementShortRate,
             spread,
           });
 
@@ -1457,6 +1604,8 @@
           symbol,
           longExchange,
           shortExchange,
+          longMarketType,
+          shortMarketType,
           startTime: formatDateTimeDisplay(startDate),
           endTime: formatDateTimeDisplay(endDate),
           settlementRows,
@@ -1474,8 +1623,8 @@
       }
 
       function renderSummary(result) {
-        const longLabel = getExchangeLabel(result.longExchange);
-        const shortLabel = getExchangeLabel(result.shortExchange);
+        const longLabel = formatExchangeWithMarket(result.longExchange, result.longMarketType);
+        const shortLabel = formatExchangeWithMarket(result.shortExchange, result.shortMarketType);
         const longImpact = getPositionFundingImpact(result.totals.longRate, "long");
         const shortImpact = getPositionFundingImpact(result.totals.shortRate, "short");
 
@@ -1555,34 +1704,39 @@
         snapshotAnnualValue.className = toClassName(result.currentSnapshot.comparableAnnualizedSpread);
 
         const rows = [
-          { side: "多", data: result.currentSnapshot.long },
-          { side: "空", data: result.currentSnapshot.short },
+          { side: "多", impactSide: "long", data: result.currentSnapshot.long },
+          { side: "空", impactSide: "short", data: result.currentSnapshot.short },
         ];
-        snapshotSideList.innerHTML = rows.map(({ side, data }) => `
+        snapshotSideList.innerHTML = rows.map(({ side, impactSide, data }) => {
+          const currentImpact = getPositionFundingImpact(data.currentRate, impactSide);
+          const normalizedImpact = getPositionFundingImpact(data.normalized8hRate, impactSide);
+          const dailyImpact = getPositionFundingImpact(data.dailyizedRate, impactSide);
+          const annualImpact = getPositionFundingImpact(data.annualizedRate, impactSide);
+          return `
           <div class="snapshot-side-card ${side === "多" ? "long" : "short"}">
             <div class="snapshot-side-head">
               <span class="snapshot-side-badge ${side === "多" ? "long" : "short"}">${side}</span>
               <div class="snapshot-side-labels">
-                <div class="snapshot-side-title">${side} · ${getExchangeLabel(data.exchange)}</div>
-                <div class="snapshot-side-meta">周期 ${formatCycle(data.cycleHours)} · 下次 ${data.nextFundingTime || "-"}</div>
+                <div class="snapshot-side-title">${side} · ${formatExchangeWithMarket(data.exchange, data.marketType || "futures")}</div>
+                <div class="snapshot-side-meta">${data.marketType === "spot" ? "现货 · 无资金费" : `周期 ${formatCycle(data.cycleHours)} · ${data.timingLabel || "下次"} ${data.nextFundingTime || "-"}`}</div>
               </div>
             </div>
             <div class="snapshot-side-grid">
               <div class="snapshot-side-item">
-                <small>当前费率</small>
-                <strong class="${toClassName(data.currentRate)}">${formatPercent(data.currentRate)}</strong>
+                <small>当前持仓影响</small>
+                <strong class="${toClassName(currentImpact)}">${formatPercent(currentImpact)}</strong>
               </div>
               <div class="snapshot-side-item">
-                <small>8H 归一</small>
-                <strong class="${toClassName(data.normalized8hRate)}">${formatPercent(data.normalized8hRate)}</strong>
+                <small>8H 归一影响</small>
+                <strong class="${toClassName(normalizedImpact)}">${formatPercent(normalizedImpact)}</strong>
               </div>
               <div class="snapshot-side-item">
-                <small>日化</small>
-                <strong class="${toClassName(data.dailyizedRate)}">${formatPercentPerDay(data.dailyizedRate)}</strong>
+                <small>日化影响</small>
+                <strong class="${toClassName(dailyImpact)}">${formatPercentPerDay(dailyImpact)}</strong>
               </div>
               <div class="snapshot-side-item">
-                <small>年化</small>
-                <strong class="${toClassName(data.annualizedRate)}">${formatPercentPerYear(data.annualizedRate)}</strong>
+                <small>年化影响</small>
+                <strong class="${toClassName(annualImpact)}">${formatPercentPerYear(annualImpact)}</strong>
               </div>
               <div class="snapshot-side-item">
                 <small>标记 / 指数偏离</small>
@@ -1590,12 +1744,13 @@
               </div>
             </div>
           </div>
-        `).join("");
+        `;
+        }).join("");
       }
 
       function renderDailyRows(result) {
-        document.getElementById("daily-long-header").textContent = `${getExchangeLabel(result.longExchange)} 累计`;
-        document.getElementById("daily-short-header").textContent = `${getExchangeLabel(result.shortExchange)} 累计`;
+        document.getElementById("daily-long-header").textContent = `${formatExchangeWithMarket(result.longExchange, result.longMarketType)} 累计`;
+        document.getElementById("daily-short-header").textContent = `${formatExchangeWithMarket(result.shortExchange, result.shortMarketType)} 累计`;
 
         const body = document.getElementById("daily-table-body");
         body.innerHTML = [...result.dailyRows].reverse().map((row) => `
@@ -1603,14 +1758,19 @@
             <td>${row.date}</td>
             <td class="${toClassName(row.longRate)}">${formatPercent(row.longRate)}</td>
             <td class="${toClassName(row.shortRate)}">${formatPercent(row.shortRate)}</td>
-            <td class="${toClassName(row.spread)}">${formatPercent(row.spread)}</td>
+            <td class="${toClassName(row.spread)}">
+              <div class="table-metric-stack">
+                <span>${formatPercent(row.spread)}</span>
+                <small>${formatPercentPerYear(row.spread !== null && row.spread !== undefined ? row.spread * 365 : null)}</small>
+              </div>
+            </td>
           </tr>
         `).join("");
       }
 
       function renderSettlementRows(result) {
-        document.getElementById("settlement-long-header").textContent = `${getExchangeLabel(result.longExchange)} %`;
-        document.getElementById("settlement-short-header").textContent = `${getExchangeLabel(result.shortExchange)} %`;
+        document.getElementById("settlement-long-header").textContent = `${formatExchangeWithMarket(result.longExchange, result.longMarketType)} %`;
+        document.getElementById("settlement-short-header").textContent = `${formatExchangeWithMarket(result.shortExchange, result.shortMarketType)} %`;
 
         const body = document.getElementById("settlement-table-body");
         body.innerHTML = [...result.settlementRows].reverse().map((row) => `
@@ -1657,6 +1817,8 @@
             symbol: symbolInput.value.trim().toUpperCase(),
             longExchange: longExchangeSelect.value,
             shortExchange: shortExchangeSelect.value,
+            longMarketType: longMarketTypeSelect.value,
+            shortMarketType: shortMarketTypeSelect.value,
             startDate,
             endDate,
           });
