@@ -706,64 +706,50 @@
         font-weight: 700;
       }
 
+      .chart-axis-label.right-axis {
+        fill: #2563eb;
+        font-weight: 700;
+      }
+
       .chart-hit-area {
         fill: transparent;
       }
 
-      .chart-line {
-        fill: none;
-        stroke: var(--accent);
-        stroke-width: 3;
-        stroke-linecap: round;
-        stroke-linejoin: round;
+      .chart-bar {
+        stroke: rgba(255, 253, 248, 0.95);
+        stroke-width: 1;
+        opacity: 0.9;
       }
 
-      .chart-settlement-line {
-        fill: none;
-        stroke: #b45309;
-        stroke-width: 2.2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        stroke-dasharray: 7 6;
+      .chart-bar.positive {
+        fill: rgba(15, 159, 99, 0.72);
       }
 
-      .chart-point {
+      .chart-bar.negative {
+        fill: rgba(209, 67, 67, 0.72);
+      }
+
+      .chart-bar.neutral {
+        fill: rgba(183, 121, 31, 0.62);
+      }
+
+      .chart-average-line {
+        fill: none;
+        stroke: #2563eb;
+        stroke-width: 2.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        filter: drop-shadow(0 3px 5px rgba(37, 99, 235, 0.14));
+      }
+
+      .chart-average-point {
+        fill: #2563eb;
         stroke: #fffdf8;
         stroke-width: 2;
       }
 
-      .chart-settlement-point {
-        stroke: #fffdf8;
-        stroke-width: 2.4;
-        filter: drop-shadow(0 2px 4px rgba(180, 83, 9, 0.2));
-      }
-
       .chart-point-group {
         cursor: default;
-      }
-
-      .chart-point.positive {
-        fill: var(--good);
-      }
-
-      .chart-point.negative {
-        fill: var(--bad);
-      }
-
-      .chart-point.neutral {
-        fill: var(--warn);
-      }
-
-      .chart-settlement-point.positive {
-        fill: var(--good);
-      }
-
-      .chart-settlement-point.negative {
-        fill: var(--bad);
-      }
-
-      .chart-settlement-point.neutral {
-        fill: #b45309;
       }
 
       .trend-head-actions {
@@ -1271,16 +1257,16 @@
       <div id="results" class="results">
         <section class="panel trend-panel">
           <div class="section-head">
-            <h2>利差走势</h2>
+            <h2>价差柱状图</h2>
             <div class="trend-head-actions">
-              <span id="trend-granularity-meta">按 1D 汇总，最新时间在右侧</span>
+              <span id="trend-granularity-meta">柱状图按 1D 汇总，右轴展示累计平均年化</span>
               <div class="trend-controls">
                 <label class="trend-control">
                   <span>颗粒度</span>
-                  <select id="trend-granularity" aria-label="走势图颗粒度"></select>
+                  <select id="trend-granularity" aria-label="图表颗粒度"></select>
                 </label>
                 <span id="trend-zoom-status" class="trend-control trend-zoom-status">滚轮缩放 1x</span>
-                <select id="trend-zoom" aria-label="走势图横轴缩放" hidden></select>
+                <select id="trend-zoom" aria-label="图表横轴缩放" hidden></select>
               </div>
             </div>
           </div>
@@ -1333,7 +1319,7 @@
             <div class="summary-aux">
               <div class="summary-line">
                 <div class="summary-line-copy">
-                  <small>历史推算日化</small>
+                  <small>选择周期平均收益</small>
                   <span id="summary-daily-interest-meta"></span>
                 </div>
                 <strong id="summary-daily-interest-value"></strong>
@@ -1565,6 +1551,10 @@
         return `${getExchangeLabel(exchange)} ${getMarketTypeLabel(marketType)}`;
       }
 
+      function clampNumber(value, minValue, maxValue) {
+        return Math.max(minValue, Math.min(maxValue, value));
+      }
+
       function formatRatio(value) {
         if (value === null || value === undefined || !Number.isFinite(value)) return "-";
         return `${value.toFixed(2)} 次/天`;
@@ -1761,13 +1751,64 @@
         return Array.from(buckets.values()).sort((a, b) => a.timeMs - b.timeMs);
       }
 
+      function buildCumulativeAverageTrendRows(trendRows, result, granularity) {
+        const timeStart = Number(result.displayStartTimeMs);
+        const timeEnd = Number(result.displayEndTimeMs);
+        const bucketMs = getTrendBucketHours(granularity) * 60 * 60 * 1000;
+        let cumulativeSpread = 0;
+
+        return trendRows
+          .filter((row) => row.spread !== null && Number.isFinite(row.spread))
+          .map((row) => {
+            cumulativeSpread += row.spread;
+            const fallbackStart = trendRows[0] ? trendRows[0].timeMs : row.timeMs;
+            const startMs = Number.isFinite(timeStart) ? timeStart : fallbackStart;
+            const endMs = Number.isFinite(timeEnd)
+              ? Math.min(timeEnd, row.timeMs + bucketMs)
+              : row.timeMs + bucketMs;
+            const elapsedDays = Math.max(bucketMs / DAY_MS, (endMs - startMs) / DAY_MS);
+            const averageDailySpread = cumulativeSpread / elapsedDays;
+
+            return {
+              ...row,
+              cumulativeSpread,
+              elapsedDays,
+              averageDailySpread,
+              annualizedAverageSpread: averageDailySpread * 365,
+              seriesKind: "cumulativeAverage",
+            };
+          });
+      }
+
       function buildTrendTooltipText(row, result) {
         const longLabel = formatExchangeWithMarket(result.longExchange, result.longMarketType);
         const shortLabel = formatExchangeWithMarket(result.shortExchange, result.shortMarketType);
+        if (row.seriesKind === "combinedTrendPoint") {
+          const barRow = row.barRow;
+          const averageRow = row.averageRow;
+          return [
+            `柱状利差 / 累计平均年化 · ${row.detailLabel}`,
+            `区间利差 (S-L): ${formatPercent(barRow ? barRow.spread : null)}`,
+            `累计利差 (S-L): ${formatPercent(averageRow ? averageRow.cumulativeSpread : null)}`,
+            `平均日收益: ${formatPercentPerDay(averageRow ? averageRow.averageDailySpread : null)}`,
+            `累计平均年化: ${formatPercentPerYear(averageRow ? averageRow.annualizedAverageSpread : null)}`,
+          ].join("\n");
+        }
+
+        if (row.seriesKind === "cumulativeAverage") {
+          return [
+            `累计平均年化 · ${row.detailLabel}`,
+            `累计利差 (S-L): ${formatPercent(row.cumulativeSpread)}`,
+            `已覆盖周期: ${formatLookbackLabel(row.elapsedDays)}`,
+            `平均日收益: ${formatPercentPerDay(row.averageDailySpread)}`,
+            `累计平均年化: ${formatPercentPerYear(row.annualizedAverageSpread)}`,
+          ].join("\n");
+        }
+
         const seriesLabel =
           row.seriesKind === "settlement"
             ? "实际结算点"
-            : "汇总趋势点";
+            : "区间柱状点";
         return [
           `${seriesLabel} · ${row.detailLabel}`,
           `做多 ${longLabel}: ${formatPercent(row.longRate)}`,
@@ -1780,10 +1821,60 @@
       function showTrendTooltip(event, row, result, anchor = null) {
         const longLabel = formatExchangeWithMarket(result.longExchange, result.longMarketType);
         const shortLabel = formatExchangeWithMarket(result.shortExchange, result.shortMarketType);
+        if (row.seriesKind === "combinedTrendPoint") {
+          const barRow = row.barRow;
+          const averageRow = row.averageRow;
+          trendTooltip.innerHTML = `
+            <strong>柱状利差 / 累计平均年化 · ${row.detailLabel}</strong>
+            <div class="trend-tooltip-row">
+              <span>区间利差 (S-L)</span>
+              <b class="${toClassName(barRow ? barRow.spread : null)}">${formatPercent(barRow ? barRow.spread : null)}</b>
+            </div>
+            <div class="trend-tooltip-row">
+              <span>累计利差 (S-L)</span>
+              <b class="${toClassName(averageRow ? averageRow.cumulativeSpread : null)}">${formatPercent(averageRow ? averageRow.cumulativeSpread : null)}</b>
+            </div>
+            <div class="trend-tooltip-row">
+              <span>平均日收益</span>
+              <b class="${toClassName(averageRow ? averageRow.averageDailySpread : null)}">${formatPercentPerDay(averageRow ? averageRow.averageDailySpread : null)}</b>
+            </div>
+            <div class="trend-tooltip-row">
+              <span>累计平均年化</span>
+              <b class="${toClassName(averageRow ? averageRow.annualizedAverageSpread : null)}">${formatPercentPerYear(averageRow ? averageRow.annualizedAverageSpread : null)}</b>
+            </div>
+          `;
+          positionTrendTooltip(event, anchor);
+          return;
+        }
+
+        if (row.seriesKind === "cumulativeAverage") {
+          trendTooltip.innerHTML = `
+            <strong>累计平均年化 · ${row.detailLabel}</strong>
+            <div class="trend-tooltip-row">
+              <span>累计利差 (S-L)</span>
+              <b class="${toClassName(row.cumulativeSpread)}">${formatPercent(row.cumulativeSpread)}</b>
+            </div>
+            <div class="trend-tooltip-row">
+              <span>已覆盖周期</span>
+              <b>${formatLookbackLabel(row.elapsedDays)}</b>
+            </div>
+            <div class="trend-tooltip-row">
+              <span>平均日收益</span>
+              <b class="${toClassName(row.averageDailySpread)}">${formatPercentPerDay(row.averageDailySpread)}</b>
+            </div>
+            <div class="trend-tooltip-row">
+              <span>累计平均年化</span>
+              <b class="${toClassName(row.annualizedAverageSpread)}">${formatPercentPerYear(row.annualizedAverageSpread)}</b>
+            </div>
+          `;
+          positionTrendTooltip(event, anchor);
+          return;
+        }
+
         const seriesLabel =
           row.seriesKind === "settlement"
             ? "实际结算点"
-            : "汇总趋势点";
+            : "区间柱状点";
 
         trendTooltip.innerHTML = `
           <strong>${seriesLabel} · ${row.detailLabel}</strong>
@@ -1805,6 +1896,10 @@
           </div>
         `;
 
+        positionTrendTooltip(event, anchor);
+      }
+
+      function positionTrendTooltip(event, anchor = null) {
         trendTooltip.classList.add("visible");
         trendTooltip.setAttribute("aria-hidden", "false");
 
@@ -2700,6 +2795,16 @@
         };
       }
 
+      function getSelectedPeriodDays(result) {
+        const explicitDays = Number(result.displayLookbackDays);
+        if (Number.isFinite(explicitDays) && explicitDays > 0) return explicitDays;
+
+        const startTimeMs = Number(result.displayStartTimeMs);
+        const endTimeMs = Number(result.displayEndTimeMs);
+        const rangeDays = (endTimeMs - startTimeMs) / DAY_MS;
+        return Number.isFinite(rangeDays) && rangeDays > 0 ? rangeDays : null;
+      }
+
       async function analyzeFundingRates({ symbol, longExchange, shortExchange, longMarketType, shortMarketType, startDate, endDate }) {
         if (!symbol) throw new Error("币种不能为空");
         if (!exchangeFetchers[longExchange]) throw new Error(`不支持的做多交易所: ${longExchange}`);
@@ -2874,6 +2979,12 @@
         const shortLabel = formatExchangeWithMarket(result.shortExchange, result.shortMarketType);
         const longImpact = getPositionFundingImpact(result.totals.longRate, "long");
         const shortImpact = getPositionFundingImpact(result.totals.shortRate, "short");
+        const selectedPeriodDays = getSelectedPeriodDays(result);
+        const averageDailySpread =
+          result.totals.spread !== null && Number.isFinite(result.totals.spread) && selectedPeriodDays !== null
+            ? result.totals.spread / selectedPeriodDays
+            : null;
+        const averageAnnualizedSpread = averageDailySpread !== null ? averageDailySpread * 365 : null;
 
         document.getElementById("result-title").textContent = `${result.symbol} 分析结果`;
         document.getElementById("result-meta").textContent = `${longLabel} 做多 / ${shortLabel} 做空 · ${result.startTime} 至 ${result.endTime}`;
@@ -2890,21 +3001,19 @@
         const spreadTag = document.getElementById("summary-spread-tag");
         const dailyInterestValue = document.getElementById("summary-daily-interest-value");
         const dailyInterestMeta = document.getElementById("summary-daily-interest-meta");
-        const predictedDailySpread = result.prediction ? result.prediction.predictedDailySpread : null;
-        const predictedAnnualizedSpread = result.prediction ? result.prediction.predictedAnnualizedSpread : null;
 
         longValue.textContent = formatPercent(longImpact);
         shortValue.textContent = formatPercent(shortImpact);
         spreadValue.textContent = formatPercent(result.totals.spread);
         dailyInterestValue.textContent =
-          predictedDailySpread === null
+          averageDailySpread === null
             ? "-"
-            : `${formatPercentPerDay(predictedDailySpread)} · ${formatPercentPerYear(predictedAnnualizedSpread)}`;
+            : `${formatPercentPerDay(averageDailySpread)} · ${formatPercentPerYear(averageAnnualizedSpread)}`;
 
         longValue.className = toClassName(longImpact);
         shortValue.className = toClassName(shortImpact);
         spreadValue.className = toClassName(result.totals.spread);
-        dailyInterestValue.className = toClassName(predictedDailySpread);
+        dailyInterestValue.className = toClassName(averageDailySpread);
 
         const longTagInfo = getFundingTag(longImpact);
         const shortTagInfo = getFundingTag(shortImpact);
@@ -2918,9 +3027,9 @@
         spreadTag.className = `tag ${spreadTagInfo.className}`;
 
         dailyInterestMeta.textContent =
-          result.prediction.latestSpread !== null && result.prediction.settlementsPerDay !== null && result.prediction.cycleHours !== null
-            ? `最新一笔资费差 ${formatPercent(result.prediction.latestSpread)} · 约 ${formatRatio(result.prediction.settlementsPerDay)} · 约每 ${formatHours(result.prediction.cycleHours)} 结算一次`
-            : "当前同结算点数据不足，暂时无法推算预测日化";
+          averageDailySpread !== null && selectedPeriodDays !== null
+            ? `按选择区间累计利差 ${formatPercent(result.totals.spread)} ÷ ${formatLookbackLabel(selectedPeriodDays)}`
+            : "当前选择区间数据不足，暂时无法计算平均收益";
       }
 
       function renderRecommendation(result) {
@@ -3043,10 +3152,10 @@
       function renderTrendChart(result) {
         const granularity = trendGranularitySelect.value || "1d";
         const trendRows = buildTrendRows(result, granularity);
-        const actualSettlementRows = buildActualSettlementTrendRows(result);
+        const cumulativeAverageRows = buildCumulativeAverageTrendRows(trendRows, result, granularity);
         const granularityLabel = getTrendGranularityLabel(granularity);
         const zoomFactor = getTrendZoomFactor();
-        trendGranularityMeta.textContent = `绿线按 ${granularityLabel} 汇总趋势，琥珀虚线为实际结算点，横轴 ${zoomFactor}x`;
+        trendGranularityMeta.textContent = `柱状图按 ${granularityLabel} 汇总利差，蓝线为累计平均年化，横轴 ${zoomFactor}x`;
         hideTrendTooltip();
 
         if (trendRows.length === 0) {
@@ -3064,28 +3173,28 @@
         const latestRow = trendRows[trendRows.length - 1];
         const bestRow = trendRows.reduce((best, row) => (best === null || row.spread > best.spread ? row : best), null);
         const worstRow = trendRows.reduce((worst, row) => (worst === null || row.spread < worst.spread ? row : worst), null);
-        const latestSettlementRow = actualSettlementRows[actualSettlementRows.length - 1] || null;
+        const latestAverageRow = cumulativeAverageRows[cumulativeAverageRows.length - 1] || null;
 
         trendSummary.innerHTML = `
           <div class="trend-stat">
-            <small>最新 ${granularityLabel} 利差</small>
+            <small>最新 ${granularityLabel} 柱状利差</small>
             <strong class="${toClassName(latestRow.spread)}">${formatPercent(latestRow.spread)}</strong>
             <span>${latestRow.detailLabel} · ${formatPercentPerYear(annualizeTrendSpread(latestRow.spread, granularity))}</span>
           </div>
           <div class="trend-stat">
-            <small>区间最佳 ${granularityLabel}</small>
+            <small>区间最佳柱</small>
             <strong class="${toClassName(bestRow.spread)}">${formatPercent(bestRow.spread)}</strong>
             <span>${bestRow.detailLabel} · ${formatPercentPerYear(annualizeTrendSpread(bestRow.spread, granularity))}</span>
           </div>
           <div class="trend-stat">
-            <small>区间最弱 ${granularityLabel}</small>
+            <small>区间最弱柱</small>
             <strong class="${toClassName(worstRow.spread)}">${formatPercent(worstRow.spread)}</strong>
             <span>${worstRow.detailLabel} · ${formatPercentPerYear(annualizeTrendSpread(worstRow.spread, granularity))}</span>
           </div>
           <div class="trend-stat">
-            <small>最新实际结算点</small>
-            <strong class="${toClassName(latestSettlementRow ? latestSettlementRow.spread : null)}">${latestSettlementRow ? formatPercent(latestSettlementRow.spread) : "-"}</strong>
-            <span>${latestSettlementRow ? `${latestSettlementRow.detailLabel} · ${getSettlementStatusLabel(latestSettlementRow)}` : "当前窗口内暂无实际结算"}</span>
+            <small>累计平均年化</small>
+            <strong class="${toClassName(latestAverageRow ? latestAverageRow.annualizedAverageSpread : null)}">${latestAverageRow ? formatPercentPerYear(latestAverageRow.annualizedAverageSpread) : "-"}</strong>
+            <span>${latestAverageRow ? `日均 ${formatPercentPerDay(latestAverageRow.averageDailySpread)} · 累计 ${formatPercent(latestAverageRow.cumulativeSpread)}` : "当前窗口内暂无可计算收益"}</span>
           </div>
         `;
 
@@ -3098,69 +3207,118 @@
           : 320;
         const chartWidth = Math.round(shellClientWidth * zoomFactor);
         const chartHeight = shellClientHeight;
-        const padding = { top: 18, right: 18, bottom: 42, left: 58 };
+        const padding = { top: 22, right: 108, bottom: 42, left: 62 };
         const plotWidth = chartWidth - padding.left - padding.right;
         const plotHeight = chartHeight - padding.top - padding.bottom;
-        const chartRowsForScale = [...trendRows, ...actualSettlementRows];
-        const values = chartRowsForScale.map((row) => row.spread);
-        let minValue = Math.min(...values, 0);
-        let maxValue = Math.max(...values, 0);
+        const chartRowsForScale = trendRows;
+        const buildScaleBounds = (rawValues) => {
+          const values = rawValues.filter((value) => value !== null && value !== undefined && Number.isFinite(value));
+          let minValue = Math.min(...values, 0);
+          let maxValue = Math.max(...values, 0);
 
-        if (Math.abs(maxValue - minValue) < 1e-8) {
-          maxValue += 0.5;
-          minValue -= 0.5;
-        } else {
-          const buffer = (maxValue - minValue) * 0.12;
-          maxValue += buffer;
-          minValue -= buffer;
-        }
+          if (!Number.isFinite(minValue) || !Number.isFinite(maxValue)) {
+            minValue = -0.5;
+            maxValue = 0.5;
+          } else if (Math.abs(maxValue - minValue) < 1e-8) {
+            maxValue += 0.5;
+            minValue -= 0.5;
+          } else {
+            const buffer = (maxValue - minValue) * 0.12;
+            maxValue += buffer;
+            minValue -= buffer;
+          }
+          return { minValue, maxValue };
+        };
+        const leftScale = buildScaleBounds(chartRowsForScale.map((row) => row.spread));
+        const stableAnnualizedRows = cumulativeAverageRows.filter((row) => row.elapsedDays >= 1);
+        const rightScaleRows = stableAnnualizedRows.length > 0 ? stableAnnualizedRows : cumulativeAverageRows;
+        const rightScale = buildScaleBounds(rightScaleRows.map((row) => row.annualizedAverageSpread));
 
-        const timeStart = result.displayStartTimeMs ?? Math.min(...chartRowsForScale.map((row) => row.timeMs));
-        const timeEnd = result.displayEndTimeMs ?? Math.max(...chartRowsForScale.map((row) => row.timeMs));
-        const timeRange = Math.max(1, timeEnd - timeStart);
-        const xForTime = (timeMs) => (
-          timeEnd === timeStart
-            ? padding.left + (plotWidth / 2)
-            : padding.left + ((timeMs - timeStart) / timeRange) * plotWidth
+        const xStep = plotWidth / Math.max(trendRows.length, 1);
+        const trendRowIndexByTime = new Map(trendRows.map((row, index) => [row.timeMs, index]));
+        const xForIndex = (index) => padding.left + (index + 0.5) * xStep;
+        const xForRow = (row) => {
+          const rowIndex = trendRowIndexByTime.get(row.timeMs);
+          return xForIndex(Number.isInteger(rowIndex) ? rowIndex : 0);
+        };
+        const yForLeftValue = (value) => (
+          padding.top + ((leftScale.maxValue - value) / (leftScale.maxValue - leftScale.minValue)) * plotHeight
         );
-        const yForValue = (value) => (
-          padding.top + ((maxValue - value) / (maxValue - minValue)) * plotHeight
+        const yForRightValue = (value) => (
+          padding.top + ((rightScale.maxValue - value) / (rightScale.maxValue - rightScale.minValue)) * plotHeight
         );
-        const zeroY = yForValue(0);
+        const yForRightValueClamped = (value) => clampNumber(
+          yForRightValue(value),
+          padding.top,
+          chartHeight - padding.bottom
+        );
+        const zeroY = yForLeftValue(0);
+        const barSlotWidth = plotWidth / Math.max(trendRows.length, 1);
+        const barWidth = Math.max(4, Math.min(34, barSlotWidth * 0.58));
 
-        const points = trendRows.map((row, index) => ({
-          x: xForTime(row.timeMs),
-          y: yForValue(row.spread),
-          value: row.spread,
-          timeMs: row.timeMs,
-          row: trendRows[index],
-          seriesKind: "aggregate",
-        }));
-        const settlementPoints = actualSettlementRows.map((row) => ({
-          x: xForTime(row.timeMs),
-          y: yForValue(row.spread),
-          value: row.spread,
+        const barPoints = trendRows.map((row, index) => {
+          const x = xForIndex(index);
+          const y = yForLeftValue(row.spread);
+          const isZero = Math.abs(row.spread) < 1e-8;
+          const rectHeight = isZero ? 2 : Math.max(2, Math.abs(zeroY - y));
+          const rectY = isZero ? zeroY - 1 : (row.spread >= 0 ? y : zeroY);
+          return {
+            x,
+            y,
+            rectX: x - (barWidth / 2),
+            rectY,
+            rectHeight,
+            barWidth,
+            anchorY: rectY + (rectHeight / 2),
+            value: row.spread,
+            timeMs: row.timeMs,
+            row: trendRows[index],
+            seriesKind: "aggregate",
+          };
+        });
+        const averagePoints = cumulativeAverageRows.map((row) => ({
+          x: xForRow(row),
+          y: yForRightValueClamped(row.annualizedAverageSpread),
+          value: row.annualizedAverageSpread,
           timeMs: row.timeMs,
           row,
-          seriesKind: "settlement",
+          seriesKind: "cumulativeAverage",
         }));
-
+        const averageRowsByTime = new Map(cumulativeAverageRows.map((row) => [row.timeMs, row]));
+        const averagePointsByTime = new Map(averagePoints.map((point) => [point.timeMs, point]));
+        const combinedHoverPoints = barPoints.map((point) => {
+          const averageRow = averageRowsByTime.get(point.timeMs) || null;
+          const averagePoint = averagePointsByTime.get(point.timeMs) || null;
+          return {
+            x: point.x,
+            y: averagePoint ? averagePoint.y : point.anchorY,
+            anchorY: averagePoint ? averagePoint.y : point.anchorY,
+            value: averageRow ? averageRow.annualizedAverageSpread : point.value,
+            timeMs: point.timeMs,
+            row: {
+              seriesKind: "combinedTrendPoint",
+              detailLabel: point.row.detailLabel,
+              barRow: point.row,
+              averageRow,
+            },
+            seriesKind: "combinedTrendPoint",
+          };
+        });
+        const combinedRowsByTime = new Map(combinedHoverPoints.map((point) => [point.timeMs, point.row]));
         const dayDividers = [];
-        if (granularity !== "1d" && trendRows.length > 1) {
-          const dividerDate = new Date(timeStart);
-          dividerDate.setHours(0, 0, 0, 0);
-          if (dividerDate.getTime() <= timeStart) {
-            dividerDate.setDate(dividerDate.getDate() + 1);
-          }
-
-          while (dividerDate.getTime() <= timeEnd) {
-            const dividerTime = dividerDate.getTime();
-            dayDividers.push({
-              x: xForTime(dividerTime),
-              label: formatShortDateLabel(formatDateDisplay(dividerDate)),
-            });
-            dividerDate.setDate(dividerDate.getDate() + 1);
-          }
+        if (trendRows.length > 1) {
+          let previousDayLabel = "";
+          trendRows.forEach((row, index) => {
+            const rowDate = new Date(row.timeMs);
+            const dayLabel = formatShortDateLabel(formatDateDisplay(rowDate));
+            if (dayLabel !== previousDayLabel) {
+              dayDividers.push({
+                x: xForIndex(index),
+                label: dayLabel,
+              });
+              previousDayLabel = dayLabel;
+            }
+          });
         }
 
         const dayDividerLabels = [];
@@ -3177,8 +3335,9 @@
         for (let index = 0; index < tickCount; index += 1) {
           const ratio = index / (tickCount - 1);
           const y = padding.top + ratio * plotHeight;
-          const value = maxValue - (maxValue - minValue) * ratio;
-          gridLines.push({ y, value });
+          const leftValue = leftScale.maxValue - (leftScale.maxValue - leftScale.minValue) * ratio;
+          const rightValue = rightScale.maxValue - (rightScale.maxValue - rightScale.minValue) * ratio;
+          gridLines.push({ y, leftValue, rightValue });
         }
 
         const xLabelIndexes = [...new Set(
@@ -3189,56 +3348,49 @@
           })
         )];
 
-        const linePath = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
-        const settlementLinePath = settlementPoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
-        const areaPath = points.length > 0
-          ? `${linePath} L ${points[points.length - 1].x} ${zeroY} L ${points[0].x} ${zeroY} Z`
-          : "";
+        const averageLinePath = averagePoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
 
         trendChart.innerHTML = `
-          <svg viewBox="0 0 ${chartWidth} ${chartHeight}" role="img" aria-label="每日利差走势" style="width:${chartWidth}px;height:auto;display:block">
-            <defs>
-              <linearGradient id="trend-area-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#136f63" stop-opacity="0.28"></stop>
-                <stop offset="100%" stop-color="#136f63" stop-opacity="0.03"></stop>
-              </linearGradient>
-            </defs>
+          <svg viewBox="0 0 ${chartWidth} ${chartHeight}" role="img" aria-label="价差柱状图与累计平均年化走势" style="width:${chartWidth}px;height:auto;display:block">
+            <text class="chart-axis-label" x="${padding.left}" y="${padding.top - 8}" text-anchor="start">利差 %</text>
+            <text class="chart-axis-label right-axis" x="${chartWidth - padding.right}" y="${padding.top - 8}" text-anchor="end">累计平均年化</text>
             ${gridLines.map((line) => `
               <g>
                 <line class="chart-grid-line" x1="${padding.left}" y1="${line.y}" x2="${chartWidth - padding.right}" y2="${line.y}"></line>
-                <text class="chart-axis-label" x="${padding.left - 10}" y="${line.y + 4}" text-anchor="end">${formatPercent(line.value)}</text>
+                <text class="chart-axis-label" x="${padding.left - 10}" y="${line.y + 4}" text-anchor="end">${formatPercent(line.leftValue)}</text>
+                <text class="chart-axis-label right-axis" x="${chartWidth - padding.right + 10}" y="${line.y + 4}" text-anchor="start">${formatPercentPerYear(line.rightValue)}</text>
               </g>
             `).join("")}
+            <line class="chart-grid-line" x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${chartHeight - padding.bottom}"></line>
+            <line class="chart-grid-line" x1="${chartWidth - padding.right}" y1="${padding.top}" x2="${chartWidth - padding.right}" y2="${chartHeight - padding.bottom}"></line>
             ${dayDividers.map((divider) => `
               <line class="chart-day-divider" x1="${divider.x}" y1="${padding.top}" x2="${divider.x}" y2="${chartHeight - padding.bottom}"></line>
             `).join("")}
             ${dayDividerLabels.map((divider) => `
-              <text class="chart-day-label" x="${divider.x + 3}" y="${padding.top + 10}" text-anchor="start">${divider.label} 00:00</text>
+              <text class="chart-day-label" x="${divider.x}" y="${padding.top + 10}" text-anchor="middle">${divider.label}</text>
             `).join("")}
             <line data-hover-line class="chart-hover-line" x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${chartHeight - padding.bottom}" style="display:none"></line>
             <g>
               <line class="chart-zero-line" x1="${padding.left}" y1="${zeroY}" x2="${chartWidth - padding.right}" y2="${zeroY}"></line>
               <text class="chart-axis-label zero" x="${padding.left - 10}" y="${zeroY + 4}" text-anchor="end">0.0000%</text>
             </g>
-            ${areaPath ? `<path class="chart-area" d="${areaPath}" style="fill:url(#trend-area-fill)"></path>` : ""}
-            ${linePath ? `<path class="chart-line" d="${linePath}"></path>` : ""}
-            ${settlementLinePath ? `<path class="chart-settlement-line" d="${settlementLinePath}"></path>` : ""}
-            ${points.map((point, index) => `
+            ${barPoints.map((point, index) => `
               <g class="chart-point-group" data-point-index="${index}">
-                <title>${buildTrendTooltipText(trendRows[index], result)}</title>
-                <circle class="chart-hit-area" cx="${point.x}" cy="${point.y}" r="12"></circle>
-                <circle class="chart-point ${toClassName(point.value)}" cx="${point.x}" cy="${point.y}" r="4.5"></circle>
+                <title>${buildTrendTooltipText(combinedHoverPoints[index].row, result)}</title>
+                <rect class="chart-bar ${toClassName(point.value)}" x="${point.rectX}" y="${point.rectY}" width="${point.barWidth}" height="${point.rectHeight}" rx="4"></rect>
+                <rect class="chart-hit-area" x="${point.rectX}" y="${padding.top}" width="${point.barWidth}" height="${plotHeight}"></rect>
               </g>
             `).join("")}
-            ${settlementPoints.map((point, index) => `
-              <g class="chart-point-group" data-settlement-point-index="${index}">
-                <title>${buildTrendTooltipText(actualSettlementRows[index], result)}</title>
-                <circle class="chart-hit-area" cx="${point.x}" cy="${point.y}" r="14"></circle>
-                <circle class="chart-settlement-point ${toClassName(point.value)}" cx="${point.x}" cy="${point.y}" r="5.2"></circle>
+            ${averageLinePath ? `<path class="chart-average-line" d="${averageLinePath}"></path>` : ""}
+            ${averagePoints.map((point, index) => `
+              <g class="chart-point-group" data-average-point-index="${index}">
+                <title>${buildTrendTooltipText(combinedRowsByTime.get(point.timeMs) || cumulativeAverageRows[index], result)}</title>
+                <circle class="chart-hit-area" cx="${point.x}" cy="${point.y}" r="12"></circle>
+                <circle class="chart-average-point" cx="${point.x}" cy="${point.y}" r="4.4"></circle>
               </g>
             `).join("")}
             ${xLabelIndexes.map((index) => `
-              <text class="chart-axis-label" x="${xForTime(trendRows[index].timeMs)}" y="${chartHeight - 12}" text-anchor="middle">${trendRows[index].axisLabel}</text>
+              <text class="chart-axis-label" x="${xForIndex(index)}" y="${chartHeight - 12}" text-anchor="middle">${trendRows[index].axisLabel}</text>
             `).join("")}
           </svg>
         `;
@@ -3248,7 +3400,7 @@
 
           const svg = trendChart.querySelector("svg");
           const hoverLine = trendChart.querySelector("[data-hover-line]");
-          const hoverItems = [...points, ...settlementPoints];
+          const hoverItems = combinedHoverPoints;
           if (!svg || !hoverLine || hoverItems.length === 0) return;
 
           const svgRect = svg.getBoundingClientRect();
@@ -3263,13 +3415,9 @@
 
           let nearestItem = hoverItems[0];
           let nearestDistance = Infinity;
-          const seriesPriority = { settlement: 2, aggregate: 1 };
           hoverItems.forEach((point) => {
             const distance = Math.abs(point.x - chartX);
-            const sameDistanceHigherPriority =
-              Math.abs(distance - nearestDistance) < 0.001 &&
-              (seriesPriority[point.seriesKind] || 0) > (seriesPriority[nearestItem.seriesKind] || 0);
-            if (distance < nearestDistance || sameDistanceHigherPriority) {
+            if (distance < nearestDistance) {
               nearestDistance = distance;
               nearestItem = point;
             }
@@ -3281,7 +3429,7 @@
 
           const pointAnchor = {
             clientX: svgRect.left + (nearestItem.x * (svgRect.width / chartWidth)),
-            clientY: svgRect.top + (nearestItem.y * (svgRect.height / chartHeight)),
+            clientY: svgRect.top + ((nearestItem.anchorY ?? nearestItem.y) * (svgRect.height / chartHeight)),
           };
           showTrendTooltip(event, nearestItem.row, result, pointAnchor);
         };
