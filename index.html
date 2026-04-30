@@ -1432,14 +1432,11 @@
         { value: "4", label: "4x" },
       ];
       const FORM_STATE_STORAGE_KEY = "cross-exchange-fee-spread:ui-state";
-      const FORM_STATE_VERSION = 3;
+      const FORM_STATE_VERSION = 4;
       const DEFAULT_LOOKBACK_DAYS = "14";
       const DAY_MS = 24 * 60 * 60 * 1000;
       const BINANCE_FUTURES_BASES = [
         "https://fapi.binance.com",
-        "https://fapi1.binance.com",
-        "https://fapi2.binance.com",
-        "https://fapi3.binance.com",
       ];
       const BYBIT_API_BASES = [
         "https://api.bybit.com",
@@ -2033,9 +2030,18 @@
 
       function buildBrowserRestrictedWarning(exchange) {
         if (IS_FILE_PROTOCOL) {
-          return `${exchange} 直连受限：当前是 file:// 单文件页面，该接口会被浏览器或交易所跨域策略拦截。若必须查询 ${exchange}，需要使用带代理的本地服务版；否则可先切换其它交易所。`;
+          return `${exchange} 直连受限：当前是 file:// 单文件页面，该接口可能被浏览器或交易所跨域策略拦截。`;
         }
-        return `${exchange} 直连受限：当前浏览器环境无法直接访问该接口，建议切换其它交易所或使用带代理的本地服务版。`;
+        return `${exchange} 直连受限：当前浏览器环境无法直接访问该接口。`;
+      }
+
+      function isBinanceInvalidSymbolError(error) {
+        return /Invalid symbol/i.test(error?.message || String(error));
+      }
+
+      function buildBinanceInvalidSymbolWarning(symbol) {
+        const binanceSymbol = symbol || "当前币种";
+        return `Binance 未找到 ${binanceSymbol} USDT 永续合约，请确认该币种在 Binance 合约市场中存在。`;
       }
 
       function isOkxMissingInstrumentMessage(message) {
@@ -2407,7 +2413,9 @@
             rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
           }
         } catch (error) {
-          if (isFailedToFetchError(error)) {
+          if (isBinanceInvalidSymbolError(error)) {
+            pushUniqueWarning(warnings, buildBinanceInvalidSymbolWarning(`${symbol}USDT`));
+          } else if (isFailedToFetchError(error)) {
             pushUniqueWarning(warnings, buildBrowserRestrictedWarning("Binance"));
           } else {
             pushUniqueWarning(warnings, `Binance 获取失败: ${formatFetchErrorMessage(error)}`);
@@ -2615,7 +2623,9 @@
             pushUniqueWarning(warnings, "BINANCE 当前周期快照直连失败，已回退为最近一笔历史结算值");
             return fallbackSnapshot;
           }
-          if (isFailedToFetchError(error)) {
+          if (isBinanceInvalidSymbolError(error)) {
+            pushUniqueWarning(warnings, buildBinanceInvalidSymbolWarning(`${symbol}USDT`));
+          } else if (isFailedToFetchError(error)) {
             pushUniqueWarning(warnings, buildBrowserRestrictedWarning("Binance"));
           } else {
             pushUniqueWarning(warnings, `BINANCE 当前周期快照获取失败: ${formatFetchErrorMessage(error)}`);
