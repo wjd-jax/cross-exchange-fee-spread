@@ -2,6 +2,7 @@
 
 ## 当前产品形态
 
+- 项目中文名：`跨所资金费`；本地目录名保持英文：`cross-exchange-fee-spread`
 - 当前优先入口是纯本地页面：`index.html`
 - 不再继续维护 Flask 版本，后续界面改动只更新纯本地页面 `index.html`
 - 当前核心用途是比较不同交易所永续合约资金费率差，用于做多 / 做空对冲判断
@@ -85,9 +86,9 @@
 
 ## 当前仓库说明
 
-- 当前唯一维护目录：`/Users/admin/Documents/Codex/cross-exchange-fee-spread`
-- 本地页面入口：`file:///Users/admin/Documents/Codex/cross-exchange-fee-spread/index.html`
-- 不再使用旧路径：`/Users/admin/Documents/Codex/2026-04-27/new-chat/`
+- 当前唯一维护目录名：`cross-exchange-fee-spread`
+- 本地页面入口：`index.html`
+- 不再使用旧路径：`2026-04-27/new-chat/`
 - `index.html` 是唯一继续维护的前端入口
 - `资费分析.html` 是本地便捷副本，不提交到远程，避免与 `index.html` 形成双维护入口
 - `legacy/` 目录存放旧的 Flask / CLI / Python 版本归档

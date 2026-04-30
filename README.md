@@ -1,4 +1,4 @@
-# cross-exchange-fee-spread
+# 跨所资金费
 
 一个纯本地网页工具，用于查看不同交易所之间的永续合约资金费率差，并输出做多 / 做空组合下的结算明细、按日汇总和当前周期快照。
 
@@ -17,19 +17,19 @@
 
 ## Main Entry
 
-[index.html](/Users/admin/Documents/Codex/2026-04-27/new-chat/cross-exchange-fee-spread/index.html)
+[index.html](index.html)
 
 直接双击打开即可运行。
 
 ## Current Structure
 
-- [index.html](/Users/admin/Documents/Codex/2026-04-27/new-chat/cross-exchange-fee-spread/index.html): 当前唯一主维护入口
-- [docs/project-memory.md](/Users/admin/Documents/Codex/2026-04-27/new-chat/cross-exchange-fee-spread/docs/project-memory.md): 当前产品状态和协作记忆
-- [legacy/README.md](/Users/admin/Documents/Codex/2026-04-27/new-chat/cross-exchange-fee-spread/legacy/README.md): 旧 Flask / CLI 方案说明
+- [index.html](index.html): 当前唯一主维护入口
+- [docs/project-memory.md](docs/project-memory.md): 当前产品状态和协作记忆
+- [legacy/README.md](legacy/README.md): 旧 Flask / CLI 方案说明
 
 ## Legacy
 
-旧的 Flask、CLI 和 Python 计算逻辑已移动到 [legacy](/Users/admin/Documents/Codex/2026-04-27/new-chat/cross-exchange-fee-spread/legacy)。
+旧的 Flask、CLI 和 Python 计算逻辑已移动到 [legacy](legacy)。
 
 这些文件现在只作为归档保留，不再是默认维护主线。
 
