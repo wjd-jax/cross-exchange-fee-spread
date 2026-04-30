@@ -85,6 +85,9 @@
 
 ## 当前仓库说明
 
+- 当前唯一维护目录：`/Users/admin/Documents/Codex/cross-exchange-fee-spread`
+- 本地页面入口：`file:///Users/admin/Documents/Codex/cross-exchange-fee-spread/index.html`
+- 不再使用旧路径：`/Users/admin/Documents/Codex/2026-04-27/new-chat/`
 - `index.html` 是唯一继续维护的前端入口
 - `资费分析.html` 是本地便捷副本，不提交到远程，避免与 `index.html` 形成双维护入口
 - `legacy/` 目录存放旧的 Flask / CLI / Python 版本归档
