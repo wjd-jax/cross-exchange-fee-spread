@@ -1215,7 +1215,7 @@
             <div class="form-grid">
               <div class="field full">
                 <label for="symbol">币种</label>
-                <input id="symbol" name="symbol" placeholder="例如 KAT">
+                <input id="symbol" name="symbol" placeholder="例如 BTC">
               </div>
               <div class="exchange-grid field full">
                 <div class="field">
@@ -1432,7 +1432,7 @@
         { value: "4", label: "4x" },
       ];
       const FORM_STATE_STORAGE_KEY = "cross-exchange-fee-spread:ui-state";
-      const FORM_STATE_VERSION = 2;
+      const FORM_STATE_VERSION = 3;
       const DEFAULT_LOOKBACK_DAYS = "14";
       const DAY_MS = 24 * 60 * 60 * 1000;
       const BINANCE_FUTURES_BASES = [
@@ -2000,6 +2000,15 @@
         return true;
       }
 
+      function normalizeSymbolInput(value) {
+        const rawValue = String(value || "").trim().toUpperCase();
+        if (!rawValue) return "";
+        const compactValue = rawValue.replace(/\s+/g, "");
+        const withoutSwapSuffix = compactValue.replace(/[-_/]?(USD|USDT)[-_/]?SWAP$/, "");
+        const withoutQuoteSuffix = withoutSwapSuffix.replace(/[-_/]?(USD|USDT)$/, "");
+        return withoutQuoteSuffix || compactValue;
+      }
+
       function formatFetchErrorMessage(error) {
         const message = error?.message || String(error);
         if (message === "Failed to fetch") {
@@ -2194,7 +2203,7 @@
       }
 
       function setDefaultFormValues() {
-        symbolInput.value = "KAT";
+        symbolInput.value = "BTC";
         longExchangeSelect.value = "bybit";
         shortExchangeSelect.value = "binance";
         longMarketTypeSelect.value = "futures";
@@ -2208,7 +2217,7 @@
       function getCachedDefaultState() {
         return {
           version: FORM_STATE_VERSION,
-          symbol: "KAT",
+          symbol: "BTC",
           longExchange: "bybit",
           shortExchange: "binance",
           longMarketType: "futures",
@@ -2222,7 +2231,7 @@
       function getCurrentFormState() {
         return {
           version: FORM_STATE_VERSION,
-          symbol: symbolInput.value.trim().toUpperCase(),
+          symbol: normalizeSymbolInput(symbolInput.value),
           longExchange: longExchangeSelect.value,
           shortExchange: shortExchangeSelect.value,
           longMarketType: longMarketTypeSelect.value,
@@ -2246,12 +2255,14 @@
           ? defaults.lookbackDays
           : rawLookbackValue;
         const parsedLookbackValue = Number(lookbackValue);
+        const rawSymbolValue = normalizeSymbolInput(state.symbol);
+        const symbolValue = isLegacyState && rawSymbolValue === "KAT"
+          ? defaults.symbol
+          : rawSymbolValue;
 
         return {
           version: FORM_STATE_VERSION,
-          symbol: typeof state.symbol === "string" && state.symbol.trim()
-            ? state.symbol.trim().toUpperCase()
-            : defaults.symbol,
+          symbol: symbolValue || defaults.symbol,
           longExchange: exchangeValues.has(state.longExchange) ? state.longExchange : defaults.longExchange,
           shortExchange: exchangeValues.has(state.shortExchange) ? state.shortExchange : defaults.shortExchange,
           longMarketType: marketTypeValues.has(state.longMarketType) ? state.longMarketType : defaults.longMarketType,
@@ -2312,7 +2323,8 @@
       }
 
       async function fetchJson(url, params) {
-        const fullUrl = `${url}?${new URLSearchParams(params).toString()}`;
+        const query = new URLSearchParams(params || {}).toString();
+        const fullUrl = query ? `${url}?${query}` : url;
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000);
         try {
@@ -2323,10 +2335,28 @@
             credentials: "omit",
             signal: controller.signal,
           });
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+          const responseText = await response.text();
+          let payload = null;
+          if (responseText) {
+            try {
+              payload = JSON.parse(responseText);
+            } catch (_error) {
+              payload = null;
+            }
           }
-          return await response.json();
+          if (!response.ok) {
+            const apiMessage =
+              payload?.msg ||
+              payload?.message ||
+              payload?.error ||
+              responseText ||
+              response.statusText;
+            throw new Error(apiMessage ? `HTTP ${response.status}: ${apiMessage}` : `HTTP ${response.status}`);
+          }
+          if (responseText && payload === null) {
+            throw new Error("接口返回了非 JSON 内容，可能被交易所重定向或拦截");
+          }
+          return payload;
         } catch (error) {
           if (error?.name === "AbortError") {
             throw new Error("request timeout");
@@ -2347,6 +2377,16 @@
           }
         }
         throw lastError || new Error("request failed");
+      }
+
+      function buildBitgetSymbol(symbol) {
+        return `${normalizeSymbolInput(symbol)}USDT`;
+      }
+
+      function assertBitgetSuccess(data, bitgetSymbol) {
+        if (data?.code && data.code !== "00000") {
+          throw new Error(`Bitget 返回错误 (${bitgetSymbol}): ${data.msg || data.code}`);
+        }
       }
 
       async function getBinanceFundingRates(symbol, startDate, endDate, warnings) {
@@ -2378,23 +2418,47 @@
 
       async function getBitgetFundingRates(symbol, startDate, endDate, warnings) {
         const rates = [];
+        const bitgetSymbol = buildBitgetSymbol(symbol);
         try {
-          const data = await fetchJson("https://api.bitget.com/api/v3/market/history-fund-rate", {
-            category: "USDT-FUTURES",
-            symbol: `${symbol}USDT`,
-            startTime: String(startDate.getTime()),
-            endTime: String(endDate.getTime() + 2000),
-            limit: "100",
-          });
-          const payload = data?.data ?? {};
-          const list = Array.isArray(payload.resultList) ? payload.resultList : [];
-          for (const item of list) {
-            const date = normalizeSettlementTime(new Date(Number(item.fundingRateTimestamp)));
-            if (date < startDate || date > new Date(endDate.getTime() + 2000)) continue;
-            rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
+          let cursor = "";
+          const seenTimestamps = new Set();
+          const endBoundary = new Date(endDate.getTime() + 2000);
+          for (let page = 0; page < 6; page += 1) {
+            const data = await fetchJson("https://api.bitget.com/api/v3/market/history-fund-rate", {
+              category: "USDT-FUTURES",
+              symbol: bitgetSymbol,
+              limit: "100",
+              ...(cursor ? { cursor } : {}),
+            });
+            assertBitgetSuccess(data, bitgetSymbol);
+            const payload = data?.data ?? {};
+            const list = Array.isArray(payload.resultList) ? payload.resultList : [];
+            if (list.length === 0) break;
+
+            let reachedStartBoundary = false;
+            for (const item of list) {
+              const timestamp = Number(item.fundingRateTimestamp);
+              if (seenTimestamps.has(timestamp)) continue;
+              seenTimestamps.add(timestamp);
+
+              const date = normalizeSettlementTime(new Date(timestamp));
+              if (date < startDate) {
+                reachedStartBoundary = true;
+                continue;
+              }
+              if (date > endBoundary) continue;
+              rates.push({ time: date, rate: Number(item.fundingRate) * 100 });
+            }
+
+            cursor = payload.nextCursor || "";
+            if (reachedStartBoundary || !cursor) break;
+          }
+
+          if (rates.length === 0) {
+            pushUniqueWarning(warnings, `Bitget 未返回 ${bitgetSymbol} 合约资金费数据，请确认该币种在 Bitget USDT 合约中存在。`);
           }
         } catch (error) {
-          warnings.push(`Bitget 获取失败: ${error.message}`);
+          pushUniqueWarning(warnings, `Bitget 获取失败: ${formatFetchErrorMessage(error)}`);
         }
         return rates;
       }
@@ -2588,29 +2652,34 @@
       }
 
       async function getBitgetCurrentSnapshot(symbol, warnings) {
+        const bitgetSymbol = buildBitgetSymbol(symbol);
         try {
           const [funding, ticker] = await Promise.all([
             fetchJson("https://api.bitget.com/api/v3/market/current-fund-rate", {
-              symbol: `${symbol}USDT`,
+              symbol: bitgetSymbol,
             }),
             fetchJson("https://api.bitget.com/api/v2/mix/market/ticker", {
-              symbol: `${symbol}USDT`,
+              symbol: bitgetSymbol,
               productType: "USDT-FUTURES",
             }),
           ]);
+          assertBitgetSuccess(funding, bitgetSymbol);
+          assertBitgetSuccess(ticker, bitgetSymbol);
           const fundingItem = Array.isArray(funding?.data) ? funding.data[0] : null;
           const tickerItem = Array.isArray(ticker?.data) ? ticker.data[0] : null;
-          if (!fundingItem || !tickerItem) throw new Error("empty response");
+          if (!fundingItem && !tickerItem) throw new Error(`Bitget 未返回 ${bitgetSymbol} 当前周期快照`);
+          const currentRate = Number(fundingItem?.fundingRate ?? tickerItem?.fundingRate);
+          if (!Number.isFinite(currentRate)) throw new Error(`Bitget 未返回 ${bitgetSymbol} 当前预测资金费率`);
           return buildCurrentSnapshot({
             exchange: "bitget",
-            currentRate: Number(fundingItem.fundingRate) * 100,
-            cycleHours: Number(fundingItem.fundingRateInterval),
-            markPrice: Number(tickerItem.markPrice),
-            indexPrice: Number(tickerItem.indexPrice),
-            nextFundingTime: formatDateTimeDisplay(new Date(Number(fundingItem.nextUpdate))),
+            currentRate: currentRate * 100,
+            cycleHours: Number(fundingItem?.fundingRateInterval) || null,
+            markPrice: tickerItem ? Number(tickerItem.markPrice) : null,
+            indexPrice: tickerItem ? Number(tickerItem.indexPrice) : null,
+            nextFundingTime: fundingItem?.nextUpdate ? formatDateTimeDisplay(new Date(Number(fundingItem.nextUpdate))) : null,
           });
         } catch (error) {
-          warnings.push(`BITGET 当前周期快照获取失败: ${error.message}`);
+          pushUniqueWarning(warnings, `BITGET 当前周期快照获取失败: ${formatFetchErrorMessage(error)}`);
           return buildCurrentSnapshot({ exchange: "bitget" });
         }
       }
@@ -3632,13 +3701,15 @@
         try {
           const requestedLookbackDays = readLookbackDays();
           const fetchLookbackDays = Math.max(requestedLookbackDays, Number(DEFAULT_LOOKBACK_DAYS));
+          const normalizedSymbol = normalizeSymbolInput(symbolInput.value);
+          symbolInput.value = normalizedSymbol;
 
           const endDate = new Date();
           endDate.setSeconds(0, 0);
           const startDate = new Date(endDate.getTime() - fetchLookbackDays * DAY_MS);
 
           const result = await analyzeFundingRates({
-            symbol: symbolInput.value.trim().toUpperCase(),
+            symbol: normalizedSymbol,
             longExchange: longExchangeSelect.value,
             shortExchange: shortExchangeSelect.value,
             longMarketType: longMarketTypeSelect.value,
