@@ -1438,11 +1438,12 @@
       const BINANCE_FUTURES_BASES = [
         "https://fapi.binance.com",
       ];
+      const BINANCE_PROXY_STORAGE_KEY = "cross-exchange-fee-spread:binance-proxy-url";
+      const BINANCE_PROXY_URL_PARAM = "binance_proxy";
       const BYBIT_API_BASES = [
         "https://api.bybit.com",
         "https://api.bytick.com",
       ];
-      const IS_FILE_PROTOCOL = window.location.protocol === "file:";
 
       const form = document.getElementById("analysis-form");
       const symbolInput = document.getElementById("symbol");
@@ -2017,8 +2018,24 @@
         return message;
       }
 
+      function wait(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
       function isFailedToFetchError(error) {
         return (error?.message || String(error)) === "Failed to fetch";
+      }
+
+      function isRequestTimeoutError(error) {
+        return (error?.message || String(error)) === "request timeout";
+      }
+
+      function isRestrictedLocationError(error) {
+        return /HTTP 451|restricted location|Service unavailable/i.test(error?.message || String(error));
+      }
+
+      function isRetriableFetchError(error) {
+        return isFailedToFetchError(error) || isRequestTimeoutError(error);
       }
 
       function pushUniqueWarning(warnings, message) {
@@ -2028,11 +2045,47 @@
         }
       }
 
-      function buildBrowserRestrictedWarning(exchange) {
-        if (IS_FILE_PROTOCOL) {
-          return `${exchange} 直连受限：当前是 file:// 单文件页面，该接口可能被浏览器或交易所跨域策略拦截。`;
+      function getConfiguredBinanceProxyUrl() {
+        const params = new URLSearchParams(window.location.search || "");
+        if (params.has(BINANCE_PROXY_URL_PARAM)) {
+          const queryValue = String(params.get(BINANCE_PROXY_URL_PARAM) || "").trim();
+          try {
+            if (queryValue) {
+              localStorage.setItem(BINANCE_PROXY_STORAGE_KEY, queryValue);
+            } else {
+              localStorage.removeItem(BINANCE_PROXY_STORAGE_KEY);
+            }
+          } catch (_error) {
+            // Ignore storage failures; the query parameter still works for this page load.
+          }
+          return queryValue;
         }
-        return `${exchange} 直连受限：当前浏览器环境无法直接访问该接口。`;
+
+        try {
+          return String(localStorage.getItem(BINANCE_PROXY_STORAGE_KEY) || "").trim();
+        } catch (_error) {
+          return "";
+        }
+      }
+
+      function buildProxyUrl(proxyUrl, targetUrl) {
+        const trimmedProxyUrl = String(proxyUrl || "").trim();
+        if (!trimmedProxyUrl) return targetUrl;
+        if (trimmedProxyUrl.includes("{url}")) {
+          return trimmedProxyUrl.replace("{url}", encodeURIComponent(targetUrl));
+        }
+        const url = new URL(trimmedProxyUrl, window.location.href);
+        url.searchParams.set("url", targetUrl);
+        return url.toString();
+      }
+
+      function buildBinanceRestrictedWarning(error) {
+        const proxyUrl = getConfiguredBinanceProxyUrl();
+        const reason = formatFetchErrorMessage(error);
+        if (proxyUrl) {
+          return `Binance 访问受限：直连和已配置代理都未拿到数据（${reason}）。`;
+        }
+        return "Binance 直连受限：当前浏览器无法直接访问 Binance Futures API；如需稳定使用 Binance，请换网络或配置服务端代理参数 binance_proxy。";
       }
 
       function isBinanceInvalidSymbolError(error) {
@@ -2328,61 +2381,86 @@
         saveFormState();
       }
 
-      async function fetchJson(url, params) {
+      async function fetchJson(url, params, options = {}) {
         const query = new URLSearchParams(params || {}).toString();
         const fullUrl = query ? `${url}?${query}` : url;
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
-        try {
-          const response = await fetch(fullUrl, {
-            method: "GET",
-            headers: { "Accept": "application/json" },
-            cache: "no-store",
-            credentials: "omit",
-            signal: controller.signal,
-          });
-          const responseText = await response.text();
-          let payload = null;
-          if (responseText) {
-            try {
-              payload = JSON.parse(responseText);
-            } catch (_error) {
-              payload = null;
+        const requestUrl = options.proxyUrl ? buildProxyUrl(options.proxyUrl, fullUrl) : fullUrl;
+        const maxAttempts = Math.max(1, Number(options.retryAttempts || 1));
+        let lastError = null;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
+          try {
+            const response = await fetch(requestUrl, {
+              method: "GET",
+              headers: { "Accept": "application/json" },
+              cache: "no-store",
+              credentials: "omit",
+              signal: controller.signal,
+            });
+            const responseText = await response.text();
+            let payload = null;
+            if (responseText) {
+              try {
+                payload = JSON.parse(responseText);
+              } catch (_error) {
+                payload = null;
+              }
             }
+            if (!response.ok) {
+              const apiMessage =
+                payload?.msg ||
+                payload?.message ||
+                payload?.error ||
+                responseText ||
+                response.statusText;
+              throw new Error(apiMessage ? `HTTP ${response.status}: ${apiMessage}` : `HTTP ${response.status}`);
+            }
+            if (responseText && payload === null) {
+              throw new Error("接口返回了非 JSON 内容，可能被交易所重定向或拦截");
+            }
+            return payload;
+          } catch (error) {
+            lastError = error?.name === "AbortError" ? new Error("request timeout") : error;
+            if (attempt < maxAttempts && isRetriableFetchError(lastError)) {
+              await wait(250 * attempt);
+              continue;
+            }
+            throw lastError;
+          } finally {
+            clearTimeout(timeoutId);
           }
-          if (!response.ok) {
-            const apiMessage =
-              payload?.msg ||
-              payload?.message ||
-              payload?.error ||
-              responseText ||
-              response.statusText;
-            throw new Error(apiMessage ? `HTTP ${response.status}: ${apiMessage}` : `HTTP ${response.status}`);
-          }
-          if (responseText && payload === null) {
-            throw new Error("接口返回了非 JSON 内容，可能被交易所重定向或拦截");
-          }
-          return payload;
-        } catch (error) {
-          if (error?.name === "AbortError") {
-            throw new Error("request timeout");
-          }
-          throw error;
-        } finally {
-          clearTimeout(timeoutId);
         }
+
+        throw lastError || new Error("request failed");
       }
 
-      async function fetchJsonFromBaseCandidates(baseUrls, path, params) {
+      async function fetchJsonFromBaseCandidates(baseUrls, path, params, options = {}) {
         let lastError = null;
         for (const baseUrl of baseUrls) {
           try {
-            return await fetchJson(`${baseUrl}${path}`, params);
+            return await fetchJson(`${baseUrl}${path}`, params, options);
           } catch (error) {
             lastError = error;
           }
         }
         throw lastError || new Error("request failed");
+      }
+
+      async function fetchBinanceJson(path, params) {
+        try {
+          return await fetchJsonFromBaseCandidates(BINANCE_FUTURES_BASES, path, params, { retryAttempts: 2 });
+        } catch (error) {
+          const proxyUrl = getConfiguredBinanceProxyUrl();
+          if (proxyUrl && (isRetriableFetchError(error) || isRestrictedLocationError(error))) {
+            return fetchJsonFromBaseCandidates(BINANCE_FUTURES_BASES, path, params, {
+              proxyUrl,
+              retryAttempts: 2,
+            });
+          }
+          throw error;
+        }
       }
 
       function buildBitgetSymbol(symbol) {
@@ -2398,7 +2476,7 @@
       async function getBinanceFundingRates(symbol, startDate, endDate, warnings) {
         const rates = [];
         try {
-          const data = await fetchJsonFromBaseCandidates(BINANCE_FUTURES_BASES, "/fapi/v1/fundingRate", {
+          const data = await fetchBinanceJson("/fapi/v1/fundingRate", {
             symbol: `${symbol}USDT`,
             startTime: String(startDate.getTime()),
             endTime: String(endDate.getTime() + 2000),
@@ -2415,8 +2493,8 @@
         } catch (error) {
           if (isBinanceInvalidSymbolError(error)) {
             pushUniqueWarning(warnings, buildBinanceInvalidSymbolWarning(`${symbol}USDT`));
-          } else if (isFailedToFetchError(error)) {
-            pushUniqueWarning(warnings, buildBrowserRestrictedWarning("Binance"));
+          } else if (isRetriableFetchError(error) || isRestrictedLocationError(error)) {
+            pushUniqueWarning(warnings, buildBinanceRestrictedWarning(error));
           } else {
             pushUniqueWarning(warnings, `Binance 获取失败: ${formatFetchErrorMessage(error)}`);
           }
@@ -2589,10 +2667,10 @@
       async function getBinanceCurrentSnapshot(symbol, historicalRows, warnings) {
         try {
           const [current, history] = await Promise.all([
-            fetchJsonFromBaseCandidates(BINANCE_FUTURES_BASES, "/fapi/v1/premiumIndex", {
+            fetchBinanceJson("/fapi/v1/premiumIndex", {
               symbol: `${symbol}USDT`,
             }),
-            fetchJsonFromBaseCandidates(BINANCE_FUTURES_BASES, "/fapi/v1/fundingRate", {
+            fetchBinanceJson("/fapi/v1/fundingRate", {
               symbol: `${symbol}USDT`,
               limit: "5",
             }),
@@ -2625,8 +2703,8 @@
           }
           if (isBinanceInvalidSymbolError(error)) {
             pushUniqueWarning(warnings, buildBinanceInvalidSymbolWarning(`${symbol}USDT`));
-          } else if (isFailedToFetchError(error)) {
-            pushUniqueWarning(warnings, buildBrowserRestrictedWarning("Binance"));
+          } else if (isRetriableFetchError(error) || isRestrictedLocationError(error)) {
+            pushUniqueWarning(warnings, buildBinanceRestrictedWarning(error));
           } else {
             pushUniqueWarning(warnings, `BINANCE 当前周期快照获取失败: ${formatFetchErrorMessage(error)}`);
           }
