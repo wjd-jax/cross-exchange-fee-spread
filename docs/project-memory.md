@@ -88,6 +88,7 @@
 
 - 当前唯一维护目录名：`cross-exchange-fee-spread`
 - 本地页面入口：`index.html`
+- 仓库已准备 GitHub Pages 部署，默认访问域名为：`https://wjd-jax.github.io/cross-exchange-fee-spread/`
 - 不再使用旧路径：`2026-04-27/new-chat/`
 - `index.html` 是唯一继续维护的前端入口
 - `资费分析.html` 是本地便捷副本，不提交到远程，避免与 `index.html` 形成双维护入口
