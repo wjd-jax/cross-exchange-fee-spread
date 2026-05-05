@@ -88,12 +88,24 @@
 
 - 当前唯一维护目录名：`cross-exchange-fee-spread`
 - 本地页面入口：`index.html`
-- 仓库已准备 GitHub Pages 部署，默认访问域名为：`https://wjd-jax.github.io/cross-exchange-fee-spread/`
+- 仓库已启用 GitHub Pages，发布源为 `GitHub Actions`
+- 默认访问域名为：`https://wjd-jax.github.io/cross-exchange-fee-spread/`
 - 不再使用旧路径：`2026-04-27/new-chat/`
 - `index.html` 是唯一继续维护的前端入口
 - `资费分析.html` 是本地便捷副本，不提交到远程，避免与 `index.html` 形成双维护入口
 - `legacy/` 目录存放旧的 Flask / CLI / Python 版本归档
 - `legacy/app.py`、`legacy/fees.py`、`legacy/src/funding_analysis.py`、`legacy/templates/index.html` 不再作为默认维护主线
+
+## 域名与部署记忆
+
+- 用户持有 Unstoppable Domains 域名：`wang666.nft`
+- `wang666.nft` 属于 Unstoppable Web3 域名，不是传统 DNS 域名
+- GitHub Pages 的标准自定义子域名需要传统 DNS 的 `CNAME` 记录，通常指向 `wjd-jax.github.io`
+- 目前不要把 `app.wang666.nft`、`funding.wang666.nft` 这类二级域名配置为 GitHub Pages 自定义域名；该路径与 Web3 域名解析机制不匹配，普通浏览器访问不会稳定生效
+- 如果继续使用 `wang666.nft`，可行方向是：
+  - 使用 `wang666.nft` 根域名做 Web3 网站或跳转到当前 GitHub Pages 地址
+  - 或使用支持传统 DNS 的域名，例如 `.com`、`.xyz`、`.net` 等，再配置二级域名访问 GitHub Pages
+- 后续如果用户要求“正常浏览器稳定访问的自定义二级域名”，优先建议使用传统 DNS 域名，不继续尝试 `wang666.nft` 的二级域名接 GitHub Pages
 
 ## 协作约定
 
