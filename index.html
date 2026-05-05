@@ -2085,7 +2085,7 @@
         if (proxyUrl) {
           return `Binance 访问受限：直连和已配置代理都未拿到数据（${reason}）。`;
         }
-        return "Binance 直连受限：当前浏览器无法直接访问 Binance Futures API；如需稳定使用 Binance，请换网络或配置服务端代理参数 binance_proxy。";
+        return "Binance 访问受限：当前网络或 VPN 节点无法连接 Binance Futures API。可切换 VPN / 网络后重试；如需长期稳定访问，可配置服务端代理参数 binance_proxy。";
       }
 
       function isBinanceInvalidSymbolError(error) {
