@@ -1507,6 +1507,7 @@
       let latestFetchedAnalysisResult = null;
       let latestFetchedLookbackDays = 0;
       let symbolPasteButtonResetTimer = null;
+      let queuedAnalysisRun = false;
       let tablePanelSyncFrame = 0;
 
       function pad(value) {
@@ -2054,6 +2055,7 @@
           return;
         }
 
+        let shouldRunAnalysis = false;
         symbolPasteButton.disabled = true;
         try {
           const clipboardText = await navigator.clipboard.readText();
@@ -2066,10 +2068,15 @@
           symbolInput.setSelectionRange(symbolInput.value.length, symbolInput.value.length);
           symbolInput.dispatchEvent(new Event("input", { bubbles: true }));
           flashSymbolPasteButton("已粘贴");
+          shouldRunAnalysis = true;
         } catch (_error) {
           flashSymbolPasteButton("失败");
         } finally {
           symbolPasteButton.disabled = false;
+        }
+
+        if (shouldRunAnalysis) {
+          requestAnalysisRun();
         }
       }
 
@@ -3843,7 +3850,12 @@
       }
 
       async function runAnalysis() {
-        if (runButton.disabled) return;
+        if (runButton.disabled) {
+          queuedAnalysisRun = true;
+          return;
+        }
+
+        queuedAnalysisRun = false;
         errorBox.innerHTML = "";
         warningBox.innerHTML = "";
         recommendationBox.innerHTML = "";
@@ -3882,7 +3894,15 @@
         } finally {
           runButton.disabled = false;
           runButton.textContent = "开始分析";
+          if (queuedAnalysisRun) {
+            queuedAnalysisRun = false;
+            runAnalysis();
+          }
         }
+      }
+
+      function requestAnalysisRun() {
+        runAnalysis();
       }
 
       form.addEventListener("submit", async (event) => {
