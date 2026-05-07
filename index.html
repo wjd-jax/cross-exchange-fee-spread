@@ -2347,6 +2347,20 @@
         lookbackPresetSelect.value = getLookbackPresetValue(lookbackDaysInput.value);
       }
 
+      function syncTrendGranularityForLookback() {
+        const lookbackDays = Number(String(lookbackDaysInput.value || "").trim());
+        let targetGranularity = null;
+        if (lookbackDays === 1) {
+          targetGranularity = "1h";
+        } else if (lookbackDays > 1 && lookbackDays <= 3) {
+          targetGranularity = "2h";
+        }
+
+        if (!targetGranularity || trendGranularitySelect.value === targetGranularity) return false;
+        trendGranularitySelect.value = targetGranularity;
+        return true;
+      }
+
       function formatLookbackLabel(days) {
         if (Number(days) === 1) return "24 小时";
         return `${Number(days).toFixed(Number.isInteger(Number(days)) ? 0 : 1)} 天`;
@@ -2365,6 +2379,7 @@
         if (shouldApplyPreset) {
           lookbackDaysInput.value = lookbackPresetSelect.value;
         }
+        syncTrendGranularityForLookback();
         saveFormState();
         if (shouldApplyPreset) {
           renderSelectedLookbackFromCache();
@@ -2373,6 +2388,7 @@
 
       function handleLookbackDaysCommitted() {
         syncLookbackPresetFromInput();
+        syncTrendGranularityForLookback();
         saveFormState();
         renderSelectedLookbackFromCache();
       }
@@ -3958,6 +3974,9 @@
       fillTrendGranularityOptions();
       fillTrendZoomOptions();
       restoreFormState();
+      if (syncTrendGranularityForLookback()) {
+        saveFormState();
+      }
       symbolPasteButton.addEventListener("click", pasteSymbolFromClipboard);
       swapExchangesButton.addEventListener("click", swapSelectedExchanges);
       form.addEventListener("input", saveFormState);
