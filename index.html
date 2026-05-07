@@ -1659,6 +1659,11 @@
         return spread * (24 / bucketHours) * 365;
       }
 
+      function annualizeDailySpread(spread) {
+        if (spread === null || spread === undefined || !Number.isFinite(spread)) return null;
+        return spread * 365;
+      }
+
       function getTrendZoomFactor() {
         const zoomFactor = Number(trendZoomSelect.value || "1");
         return Number.isFinite(zoomFactor) && zoomFactor > 0 ? zoomFactor : 1;
@@ -1716,6 +1721,19 @@
 
       function buildTrendRows(result, granularity) {
         const actualSettlementRows = buildActualSettlementTrendRows(result);
+        const dailyRowsByDate = new Map((result.dailyRows || []).map((row) => [row.date, row]));
+        const attachDailyAverage = (row, dayKey = getTrendDayKey(row.timeMs)) => {
+          const dailyRow = dailyRowsByDate.get(dayKey);
+          const dailySpread =
+            dailyRow && dailyRow.spread !== null && Number.isFinite(dailyRow.spread)
+              ? dailyRow.spread
+              : null;
+          return {
+            ...row,
+            dailySpread,
+            dailyAverageAnnualizedSpread: annualizeDailySpread(dailySpread),
+          };
+        };
 
         if (granularity === "1d") {
           const settlementStatsByDay = new Map();
@@ -1745,6 +1763,8 @@
                 settlementCount: settlementStats.settlementCount,
                 longSettlementCount: settlementStats.longSettlementCount,
                 shortSettlementCount: settlementStats.shortSettlementCount,
+                dailySpread: row.spread,
+                dailyAverageAnnualizedSpread: annualizeDailySpread(row.spread),
                 seriesKind: "aggregate",
               };
             });
@@ -1780,7 +1800,9 @@
           bucket.shortSettlementCount += row.shortSettled ? 1 : 0;
         }
 
-        return Array.from(buckets.values()).sort((a, b) => a.timeMs - b.timeMs);
+        return Array.from(buckets.values())
+          .sort((a, b) => a.timeMs - b.timeMs)
+          .map((row) => attachDailyAverage(row));
       }
 
       function buildCumulativeAverageTrendRows(trendRows, result, granularity) {
@@ -1818,9 +1840,13 @@
         if (row.seriesKind === "combinedTrendPoint") {
           const barRow = row.barRow;
           const averageRow = row.averageRow;
+          const dailyAverageAnnualizedSpread = averageRow
+            ? averageRow.dailyAverageAnnualizedSpread
+            : barRow?.dailyAverageAnnualizedSpread;
           return [
             `柱状利差 / 累计平均年化 · ${row.detailLabel}`,
             `区间利差 (S-L): ${formatPercent(barRow ? barRow.spread : null)}`,
+            `当日平均年化: ${formatPercentPerYear(dailyAverageAnnualizedSpread)}`,
             `累计利差 (S-L): ${formatPercent(averageRow ? averageRow.cumulativeSpread : null)}`,
             `平均日收益: ${formatPercentPerDay(averageRow ? averageRow.averageDailySpread : null)}`,
             `累计平均年化: ${formatPercentPerYear(averageRow ? averageRow.annualizedAverageSpread : null)}`,
@@ -1830,6 +1856,7 @@
         if (row.seriesKind === "cumulativeAverage") {
           return [
             `累计平均年化 · ${row.detailLabel}`,
+            `当日平均年化: ${formatPercentPerYear(row.dailyAverageAnnualizedSpread)}`,
             `累计利差 (S-L): ${formatPercent(row.cumulativeSpread)}`,
             `已覆盖周期: ${formatLookbackLabel(row.elapsedDays)}`,
             `平均日收益: ${formatPercentPerDay(row.averageDailySpread)}`,
@@ -1846,6 +1873,7 @@
           `做多 ${longLabel}: ${formatPercent(row.longRate)}`,
           `做空 ${shortLabel}: ${formatPercent(row.shortRate)}`,
           `利差 (S-L): ${formatPercent(row.spread)}`,
+          `当日平均年化: ${formatPercentPerYear(row.dailyAverageAnnualizedSpread)}`,
           getSettlementStatusLabel(row),
         ].join("\n");
       }
@@ -1856,11 +1884,18 @@
         if (row.seriesKind === "combinedTrendPoint") {
           const barRow = row.barRow;
           const averageRow = row.averageRow;
+          const dailyAverageAnnualizedSpread = averageRow
+            ? averageRow.dailyAverageAnnualizedSpread
+            : barRow?.dailyAverageAnnualizedSpread;
           trendTooltip.innerHTML = `
             <strong>柱状利差 / 累计平均年化 · ${row.detailLabel}</strong>
             <div class="trend-tooltip-row">
               <span>区间利差 (S-L)</span>
               <b class="${toClassName(barRow ? barRow.spread : null)}">${formatPercent(barRow ? barRow.spread : null)}</b>
+            </div>
+            <div class="trend-tooltip-row">
+              <span>当日平均年化</span>
+              <b class="${toClassName(dailyAverageAnnualizedSpread)}">${formatPercentPerYear(dailyAverageAnnualizedSpread)}</b>
             </div>
             <div class="trend-tooltip-row">
               <span>累计利差 (S-L)</span>
@@ -1882,6 +1917,10 @@
         if (row.seriesKind === "cumulativeAverage") {
           trendTooltip.innerHTML = `
             <strong>累计平均年化 · ${row.detailLabel}</strong>
+            <div class="trend-tooltip-row">
+              <span>当日平均年化</span>
+              <b class="${toClassName(row.dailyAverageAnnualizedSpread)}">${formatPercentPerYear(row.dailyAverageAnnualizedSpread)}</b>
+            </div>
             <div class="trend-tooltip-row">
               <span>累计利差 (S-L)</span>
               <b class="${toClassName(row.cumulativeSpread)}">${formatPercent(row.cumulativeSpread)}</b>
@@ -1921,6 +1960,10 @@
           <div class="trend-tooltip-row">
             <span>利差 (S-L)</span>
             <b class="${toClassName(row.spread)}">${formatPercent(row.spread)}</b>
+          </div>
+          <div class="trend-tooltip-row">
+            <span>当日平均年化</span>
+            <b class="${toClassName(row.dailyAverageAnnualizedSpread)}">${formatPercentPerYear(row.dailyAverageAnnualizedSpread)}</b>
           </div>
           <div class="trend-tooltip-row">
             <span>结算状态</span>
