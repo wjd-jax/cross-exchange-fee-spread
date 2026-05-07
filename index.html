@@ -111,6 +111,32 @@
         box-shadow: 0 0 0 3px rgba(19, 111, 99, 0.08);
       }
 
+      .symbol-config {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 72px;
+        gap: 8px;
+      }
+
+      .paste-button {
+        width: auto;
+        min-height: 46px;
+        height: 46px;
+        padding: 0 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(19, 111, 99, 0.16);
+        background: #eef7f5;
+        color: var(--accent);
+        box-shadow: none;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .paste-button:hover:not(:disabled) {
+        transform: none;
+        box-shadow: none;
+        background: #e4f3ef;
+      }
+
       .entry-head {
         display: grid;
         gap: 4px;
@@ -1217,7 +1243,10 @@
             <div class="form-grid">
               <div class="field full">
                 <label for="symbol">币种</label>
-                <input id="symbol" name="symbol" placeholder="例如 BTC">
+                <div class="symbol-config">
+                  <input id="symbol" name="symbol" placeholder="例如 BTC">
+                  <button id="paste-symbol" class="paste-button" type="button" aria-label="粘贴币种">粘贴</button>
+                </div>
               </div>
               <div class="exchange-grid field full">
                 <div class="field">
@@ -1449,6 +1478,7 @@
 
       const form = document.getElementById("analysis-form");
       const symbolInput = document.getElementById("symbol");
+      const symbolPasteButton = document.getElementById("paste-symbol");
       const longExchangeSelect = document.getElementById("long_exchange");
       const shortExchangeSelect = document.getElementById("short_exchange");
       const longMarketTypeSelect = document.getElementById("long_market_type");
@@ -1476,6 +1506,7 @@
       let latestAnalysisResult = null;
       let latestFetchedAnalysisResult = null;
       let latestFetchedLookbackDays = 0;
+      let symbolPasteButtonResetTimer = null;
       let tablePanelSyncFrame = 0;
 
       function pad(value) {
@@ -2007,6 +2038,39 @@
         const withoutSwapSuffix = compactValue.replace(/[-_/]?(USD|USDT)[-_/]?SWAP$/, "");
         const withoutQuoteSuffix = withoutSwapSuffix.replace(/[-_/]?(USD|USDT)$/, "");
         return withoutQuoteSuffix || compactValue;
+      }
+
+      function flashSymbolPasteButton(label) {
+        window.clearTimeout(symbolPasteButtonResetTimer);
+        symbolPasteButton.textContent = label;
+        symbolPasteButtonResetTimer = window.setTimeout(() => {
+          symbolPasteButton.textContent = "粘贴";
+        }, 1200);
+      }
+
+      async function pasteSymbolFromClipboard() {
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+          flashSymbolPasteButton("失败");
+          return;
+        }
+
+        symbolPasteButton.disabled = true;
+        try {
+          const clipboardText = await navigator.clipboard.readText();
+          const normalizedSymbol = normalizeSymbolInput(clipboardText);
+          if (!normalizedSymbol) {
+            throw new Error("empty clipboard");
+          }
+          symbolInput.value = normalizedSymbol;
+          symbolInput.focus();
+          symbolInput.setSelectionRange(symbolInput.value.length, symbolInput.value.length);
+          symbolInput.dispatchEvent(new Event("input", { bubbles: true }));
+          flashSymbolPasteButton("已粘贴");
+        } catch (_error) {
+          flashSymbolPasteButton("失败");
+        } finally {
+          symbolPasteButton.disabled = false;
+        }
       }
 
       function formatFetchErrorMessage(error) {
@@ -3831,6 +3895,7 @@
       fillTrendGranularityOptions();
       fillTrendZoomOptions();
       restoreFormState();
+      symbolPasteButton.addEventListener("click", pasteSymbolFromClipboard);
       swapExchangesButton.addEventListener("click", swapSelectedExchanges);
       form.addEventListener("input", saveFormState);
       form.addEventListener("change", saveFormState);
