@@ -1846,9 +1846,9 @@
           return [
             `柱状利差 / 累计平均年化 · ${row.detailLabel}`,
             `区间利差 (S-L): ${formatPercent(barRow ? barRow.spread : null)}`,
-            `当日平均年化: ${formatPercentPerYear(dailyAverageAnnualizedSpread)}`,
             `累计利差 (S-L): ${formatPercent(averageRow ? averageRow.cumulativeSpread : null)}`,
             `平均日收益: ${formatPercentPerDay(averageRow ? averageRow.averageDailySpread : null)}`,
+            `当日平均年化: ${formatPercentPerYear(dailyAverageAnnualizedSpread)}`,
             `累计平均年化: ${formatPercentPerYear(averageRow ? averageRow.annualizedAverageSpread : null)}`,
           ].join("\n");
         }
@@ -1856,10 +1856,10 @@
         if (row.seriesKind === "cumulativeAverage") {
           return [
             `累计平均年化 · ${row.detailLabel}`,
-            `当日平均年化: ${formatPercentPerYear(row.dailyAverageAnnualizedSpread)}`,
             `累计利差 (S-L): ${formatPercent(row.cumulativeSpread)}`,
             `已覆盖周期: ${formatLookbackLabel(row.elapsedDays)}`,
             `平均日收益: ${formatPercentPerDay(row.averageDailySpread)}`,
+            `当日平均年化: ${formatPercentPerYear(row.dailyAverageAnnualizedSpread)}`,
             `累计平均年化: ${formatPercentPerYear(row.annualizedAverageSpread)}`,
           ].join("\n");
         }
@@ -1894,16 +1894,16 @@
               <b class="${toClassName(barRow ? barRow.spread : null)}">${formatPercent(barRow ? barRow.spread : null)}</b>
             </div>
             <div class="trend-tooltip-row">
-              <span>当日平均年化</span>
-              <b class="${toClassName(dailyAverageAnnualizedSpread)}">${formatPercentPerYear(dailyAverageAnnualizedSpread)}</b>
-            </div>
-            <div class="trend-tooltip-row">
               <span>累计利差 (S-L)</span>
               <b class="${toClassName(averageRow ? averageRow.cumulativeSpread : null)}">${formatPercent(averageRow ? averageRow.cumulativeSpread : null)}</b>
             </div>
             <div class="trend-tooltip-row">
               <span>平均日收益</span>
               <b class="${toClassName(averageRow ? averageRow.averageDailySpread : null)}">${formatPercentPerDay(averageRow ? averageRow.averageDailySpread : null)}</b>
+            </div>
+            <div class="trend-tooltip-row">
+              <span>当日平均年化</span>
+              <b class="${toClassName(dailyAverageAnnualizedSpread)}">${formatPercentPerYear(dailyAverageAnnualizedSpread)}</b>
             </div>
             <div class="trend-tooltip-row">
               <span>累计平均年化</span>
@@ -1918,10 +1918,6 @@
           trendTooltip.innerHTML = `
             <strong>累计平均年化 · ${row.detailLabel}</strong>
             <div class="trend-tooltip-row">
-              <span>当日平均年化</span>
-              <b class="${toClassName(row.dailyAverageAnnualizedSpread)}">${formatPercentPerYear(row.dailyAverageAnnualizedSpread)}</b>
-            </div>
-            <div class="trend-tooltip-row">
               <span>累计利差 (S-L)</span>
               <b class="${toClassName(row.cumulativeSpread)}">${formatPercent(row.cumulativeSpread)}</b>
             </div>
@@ -1932,6 +1928,10 @@
             <div class="trend-tooltip-row">
               <span>平均日收益</span>
               <b class="${toClassName(row.averageDailySpread)}">${formatPercentPerDay(row.averageDailySpread)}</b>
+            </div>
+            <div class="trend-tooltip-row">
+              <span>当日平均年化</span>
+              <b class="${toClassName(row.dailyAverageAnnualizedSpread)}">${formatPercentPerYear(row.dailyAverageAnnualizedSpread)}</b>
             </div>
             <div class="trend-tooltip-row">
               <span>累计平均年化</span>
