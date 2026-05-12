@@ -2304,6 +2304,9 @@
       }
 
       function loadUmengAnalytics() {
+        const pageProtocol = window.location.protocol;
+        if (pageProtocol !== "https:" && pageProtocol !== "http:") return;
+
         const appKey = String(UMENG_APP_KEY || "").trim();
         const sdkId = String(UMENG_APLUS_SDK_ID || "").trim();
         if (!/^[a-z0-9]{16,64}$/i.test(appKey) || !/^\d+$/.test(sdkId)) return;

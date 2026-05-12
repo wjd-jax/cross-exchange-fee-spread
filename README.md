@@ -24,7 +24,7 @@
 
 ## Analytics
 
-页面已接入友盟 H5 统计，`appkey` 配置在 [index.html](index.html) 里的 `UMENG_APP_KEY`。发布后访问数据会进入友盟后台，页面内不展示统计数据。
+页面已接入友盟 H5 统计，`appkey` 配置在 [index.html](index.html) 里的 `UMENG_APP_KEY`。本地 `file://` 预览时会跳过统计脚本，发布到 `http://` 或 `https://` 后访问数据会进入友盟后台，页面内不展示统计数据。
 
 ## Current Structure
 
