@@ -1475,6 +1475,8 @@
         "https://api.bybit.com",
         "https://api.bytick.com",
       ];
+      const UMENG_APP_KEY = "6a02c2046f259537c7a7ee17";
+      const UMENG_APLUS_SDK_ID = "203467608";
 
       const form = document.getElementById("analysis-form");
       const symbolInput = document.getElementById("symbol");
@@ -2299,6 +2301,26 @@
           return;
         }
         container.innerHTML = `<div class="alert ${type}">${messages.map((message) => `<div>${escapeHtml(message)}</div>`).join("")}</div>`;
+      }
+
+      function loadUmengAnalytics() {
+        const appKey = String(UMENG_APP_KEY || "").trim();
+        const sdkId = String(UMENG_APLUS_SDK_ID || "").trim();
+        if (!/^[a-z0-9]{16,64}$/i.test(appKey) || !/^\d+$/.test(sdkId)) return;
+        if (document.getElementById("beacon-aplus")) return;
+
+        window.aplus_queue = window.aplus_queue || [];
+        window.aplus_queue.push({
+          action: "aplus.setMetaInfo",
+          arguments: ["appKey", appKey],
+        });
+
+        const firstScript = document.getElementsByTagName("script")[0];
+        const script = document.createElement("script");
+        script.async = true;
+        script.id = "beacon-aplus";
+        script.src = `https://d.alicdn.com/alilog/mlog/aplus/${encodeURIComponent(sdkId)}.js`;
+        firstScript.parentNode.insertBefore(script, firstScript);
       }
 
       function fillExchangeOptions() {
@@ -3969,6 +3991,7 @@
         await runAnalysis();
       });
 
+      loadUmengAnalytics();
       fillExchangeOptions();
       fillLookbackPresetOptions();
       fillTrendGranularityOptions();
